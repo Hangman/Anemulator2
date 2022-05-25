@@ -1,8 +1,9 @@
 [package]
-name = "Anemulator2"
+name = "anemulator2"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["Matthias Finke <webmaster@pottgames.de>"]
 
 [dependencies]
+pixels = "0.6.0"
+sdl2 = { version = "0.34.5", features = ["bundled", "raw-window-handle", "static-link"] }
