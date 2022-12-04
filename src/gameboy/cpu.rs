@@ -1,4 +1,5 @@
 mod register;
+mod instructions;
 
 pub struct Cpu {}
 
