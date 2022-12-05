@@ -1,5 +1,6 @@
 pub mod cpu;
 pub mod ppu;
+pub mod ram;
 
 pub struct Gameboy {
     cpu: cpu::Cpu,
