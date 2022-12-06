@@ -1,5 +1,6 @@
+use std::fmt::Display;
+
 /// Joypad State register
-///
 /// Bit 7 = unused
 /// Bit 6 = unused
 /// Bit 5 = Select action buttons : 0=selected, 1=not selected
@@ -222,23 +223,23 @@ pub const SVBK: u16 = 0xFF70;
 pub const IE: u16 = 0xFFFF;
 
 
-pub trait Memory {
-    fn accepts_address(&self, address: &u16) -> bool;
+pub trait Memory: Display {
+    fn accepts_address(&self, address: u16) -> bool;
 
-    fn read_byte(&self, address: &u16) -> u8;
+    fn read_byte(&self, address: u16) -> u8;
 
-    fn read_word(&self, address: &u16) -> u16 {
-        let second_byte_address = *address + 1;
-        (self.read_byte(address) as u16) | ((self.read_byte(&second_byte_address) as u16) << 8)
+    fn read_word(&self, address: u16) -> u16 {
+        let second_byte_address = address + 1;
+        (self.read_byte(address) as u16) | ((self.read_byte(second_byte_address) as u16) << 8)
     }
 
-    fn write_byte(&mut self, address: &u16, value: u8);
+    fn write_byte(&mut self, address: u16, value: u8);
 
-    fn is_bit_set(&self, address: &u16, bitnum: usize) -> bool {
+    fn is_bit_set(&self, address: u16, bitnum: usize) -> bool {
         (self.read_byte(address) & (1 << bitnum)) > 0
     }
 
-    fn set_bit(&mut self, address: &u16, bitnum: usize, value: bool) {
+    fn set_bit(&mut self, address: u16, bitnum: usize, value: bool) {
         let mut data = self.read_byte(address);
         if value {
             data |= 1 << bitnum;
