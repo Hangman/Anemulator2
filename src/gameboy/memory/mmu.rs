@@ -2,7 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use crate::gameboy::ram::memory::Memory;
 
-struct Mmu {
+pub struct Mmu {
     unit_lut: Vec<Box<dyn Memory>>,
 }
 

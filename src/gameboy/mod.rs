@@ -2,17 +2,4 @@ pub mod cpu;
 pub mod ppu;
 pub mod ram;
 pub mod memory;
-
-pub struct Gameboy {
-    cpu: cpu::Cpu,
-    ppu: ppu::Ppu,
-}
-
-impl Gameboy {
-    pub fn new() -> Self {
-        Self {
-            cpu: cpu::Cpu::new(),
-            ppu: ppu::Ppu::new(),
-        }
-    }
-}
+pub mod gameboy;

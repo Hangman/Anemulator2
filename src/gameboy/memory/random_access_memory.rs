@@ -8,6 +8,15 @@ pub struct RandomAccessMemory {
     pub start_address: usize,
 }
 
+impl RandomAccessMemory {
+    pub fn create(name: &str, start_address: u16, length: usize) -> Self {
+        Self {
+            name: name.to_string(),
+            memory: vec![0; length],
+            start_address: start_address as usize,
+        }
+    }
+}
 
 impl Display for RandomAccessMemory {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
