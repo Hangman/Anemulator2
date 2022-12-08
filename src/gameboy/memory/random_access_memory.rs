@@ -8,7 +8,6 @@ pub struct RandomAccessMemory {
     pub start_address: usize,
 }
 
-impl RandomAccessMemory {}
 
 impl Display for RandomAccessMemory {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
