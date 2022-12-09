@@ -6,8 +6,7 @@ use std::time::Instant;
 use pixels::{PixelsBuilder, SurfaceTexture};
 use sdl2::audio::{AudioQueue, AudioSpecDesired};
 use sdl2::event::{Event, WindowEvent};
-
-use gameboy::Gameboy;
+use crate::gameboy::gameboy::Gameboy;
 
 
 fn main() {

@@ -3,6 +3,7 @@ use crate::gameboy::memory::mmu::Mmu;
 use crate::gameboy::memory::random_access_memory::RandomAccessMemory;
 use crate::gameboy::ppu::Ppu;
 use crate::gameboy::ram::memory;
+use crate::gameboy::memory::wram::Wram;
 
 pub struct Gameboy {
     cpu: Cpu,
@@ -15,13 +16,13 @@ pub struct Gameboy {
 }
 
 impl Gameboy {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let mut mmu = Mmu::new();
 
         // ADD MEMORY UNITS
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("VRAM", 0x8000, 0xA000 - 0x8000)));
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("OAM RAM", 0xFE00, 0xFEA0 - 0xFE00)));
-        // TODO ADD WRAM
+        mmu.add_memory_unit(Box::from(Wram::new()));
         // TODO ADD MBC
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("HRAM", 0xFF80, 0xFFFF - 0xFF80)));
         // TODO ADD INTERRUPTS REGISTERS
