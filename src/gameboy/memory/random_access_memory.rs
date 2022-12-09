@@ -9,7 +9,7 @@ pub struct RandomAccessMemory {
 }
 
 impl RandomAccessMemory {
-    pub fn create(name: &str, start_address: u16, length: usize) -> Self {
+    pub fn new(name: &str, start_address: u16, length: usize) -> Self {
         Self {
             name: name.to_string(),
             memory: vec![0; length],
