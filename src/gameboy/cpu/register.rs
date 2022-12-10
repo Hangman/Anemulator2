@@ -71,20 +71,20 @@ impl Registers {
     #[inline]
     pub fn is_flag_set(&self, id: &FlagId) -> bool {
         match id {
-            FlagId::Z => { self.f & (1 << 7) > 0 }
-            FlagId::N => { self.f & (1 << 6) > 0 }
-            FlagId::H => { self.f & (1 << 5) > 0 }
-            FlagId::C => { self.f & (1 << 4) > 0 }
+            FlagId::Z => self.f & (1 << 7) > 0,
+            FlagId::N => self.f & (1 << 6) > 0,
+            FlagId::H => self.f & (1 << 5) > 0,
+            FlagId::C => self.f & (1 << 4) > 0,
         }
     }
 
     #[inline]
     pub fn set_flag(&mut self, id: &FlagId, value: bool) {
         let bit_index = match id {
-            FlagId::Z => { 7 }
-            FlagId::N => { 6 }
-            FlagId::H => { 5 }
-            FlagId::C => { 4 }
+            FlagId::Z => 7,
+            FlagId::N => 6,
+            FlagId::H => 5,
+            FlagId::C => 4,
         };
         if value {
             self.f |= 1 << bit_index;
@@ -94,11 +94,9 @@ impl Registers {
     }
 }
 
-
 pub enum FlagId {
     Z,
     N,
     H,
     C,
 }
-

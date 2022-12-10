@@ -27,7 +27,8 @@ impl Display for RandomAccessMemory {
 impl Memory for RandomAccessMemory {
     fn accepts_address(&self, address: u16) -> bool {
         let address_usize = address as usize;
-        address_usize >= self.start_address && address_usize < self.start_address + self.memory.len()
+        address_usize >= self.start_address
+            && address_usize < self.start_address + self.memory.len()
     }
 
     fn read_byte(&self, address: u16) -> u8 {

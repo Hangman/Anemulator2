@@ -1,5 +1,5 @@
-mod register;
 mod instructions;
+mod register;
 
 pub struct Cpu {}
 

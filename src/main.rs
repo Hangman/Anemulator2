@@ -2,25 +2,36 @@
 
 mod gameboy;
 
-use std::time::Instant;
+use crate::gameboy::gameboy::Gameboy;
 use pixels::{PixelsBuilder, SurfaceTexture};
 use sdl2::audio::{AudioQueue, AudioSpecDesired};
 use sdl2::event::{Event, WindowEvent};
-use crate::gameboy::gameboy::Gameboy;
-
+use std::time::Instant;
 
 fn main() {
     println!("Starting Anemulator2");
 
     let sdl = sdl2::init().expect("failed to initialize SDL");
-    let audio_subsystem = sdl.audio().expect("failed to initialize SDL audio subsystem");
-    let video_subsystem = sdl.video().expect("failed to initialize SDL video subsystem");
-    let window = video_subsystem.window("Anemulator2", 480, 432).position_centered().resizable().build().expect("failed to create a window");
+    let audio_subsystem = sdl
+        .audio()
+        .expect("failed to initialize SDL audio subsystem");
+    let video_subsystem = sdl
+        .video()
+        .expect("failed to initialize SDL video subsystem");
+    let window = video_subsystem
+        .window("Anemulator2", 480, 432)
+        .position_centered()
+        .resizable()
+        .build()
+        .expect("failed to create a window");
 
     let mut pixels = {
         let window_size = window.drawable_size();
         let texture = SurfaceTexture::new(window_size.0, window_size.1, &window);
-        PixelsBuilder::new(160, 144, texture).enable_vsync(true).build().expect("failed to create a Pixels instance")
+        PixelsBuilder::new(160, 144, texture)
+            .enable_vsync(true)
+            .build()
+            .expect("failed to create a Pixels instance")
     };
 
     let desired_spec = AudioSpecDesired {
@@ -29,7 +40,9 @@ fn main() {
         samples: Some(1024),
     };
 
-    let audio_queue: AudioQueue<f32> = audio_subsystem.open_queue(None, &desired_spec).expect("failed to create audio queue");
+    let audio_queue: AudioQueue<f32> = audio_subsystem
+        .open_queue(None, &desired_spec)
+        .expect("failed to create audio queue");
 
     audio_queue.resume();
 

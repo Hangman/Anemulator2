@@ -1,5 +1,5 @@
-use std::fmt::{Display, Formatter};
 use crate::gameboy::mbc::mbc::Mbc;
+use std::fmt::{Display, Formatter};
 
 use crate::gameboy::ram::memory::Memory;
 
@@ -54,7 +54,9 @@ impl Memory for Mmu {
         if self.mbc.accepts_address(address) {
             return self.mbc.read_byte(address);
         }
-        let unit = self.get_unit(address).unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
+        let unit = self
+            .get_unit(address)
+            .unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
         unit.read_byte(address)
     }
 
@@ -63,7 +65,9 @@ impl Memory for Mmu {
             self.mbc.write_byte(address, value);
             return;
         }
-        let unit = self.get_mut_unit(address).unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
+        let unit = self
+            .get_mut_unit(address)
+            .unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
         unit.write_byte(address, value);
     }
 }

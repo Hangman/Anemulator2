@@ -11,13 +11,11 @@ use std::fmt::Display;
 /// Bit 0 = Right or A : 0=pressed, 1=not pressed
 pub const JOYPAD: u16 = 0xFF00;
 
-
 /// Serial transfer data register
 /// Before a transfer, it holds the next byte that will go out.
 /// During a transfer, it has a blend of the outgoing and incoming bytes. Each cycle, the leftmost bit is shifted out (and over the wire) and the incoming
 /// bit is shifted in from the other side.
 pub const SB: u16 = 0xFF01;
-
 
 /// Serial transfer control register
 /// Bit 7 = Transfer Start Flag (0=No transfer is in progress or requested, 1=Transfer in progress, or request
@@ -25,19 +23,16 @@ pub const SB: u16 = 0xFF01;
 /// Bit 0 = Shift Clock (0=External Clock, 1=Internal Clock)
 pub const SC: u16 = 0xFF02;
 
-
 /// This register is incremented at a rate of 16384Hz (~16779Hz on SGB).
 /// Writing any value to this register resets it to $00.
 /// Additionally, this register is reset when executing the stop instruction, and only begins ticking again once stop mode ends.
 pub const DIV: u16 = 0xFF04;
-
 
 /// Timer Counter register
 ///
 /// This timer is incremented at the clock frequency specified by the TAC register ($FF07).
 /// When the value overflows (exceeds $FF) it is reset to the value specified in TMA (FF06) and an pub consterrupt is requested.
 pub const TIMA: u16 = 0xFF05;
-
 
 /// Timer Modulo register
 ///
@@ -48,7 +43,6 @@ pub const TIMA: u16 = 0xFF05;
 /// If a TMA write is executed on the same cycle as the content of TMA is transferred to TIMA due to a timer overflow, the old value is transferred to TIMA.
 pub const TMA: u16 = 0xFF06;
 
-
 /// Timer Control register
 ///
 /// Bit 2 = Timer Enable : 0=off, 1=on
@@ -58,7 +52,6 @@ pub const TMA: u16 = 0xFF06;
 /// 10 = CPU Clock / 64
 /// 11 = CPU Clock / 256
 pub const TAC: u16 = 0xFF07;
-
 
 /// Interrupt Flag register
 /// Bit 4 = Joypad : 0=off, 1=request
@@ -114,7 +107,6 @@ pub const NR51: u16 = 0xFF25;
 
 pub const NR52: u16 = 0xFF26;
 
-
 /// LCD Control register
 /// Bit 7 = LCD and GPU enable : 0=off, 1=on
 /// Bit 6 = Window tile map area : 0=0x9800-0x9BFF, 1=0x9C00-0x9FFF
@@ -126,7 +118,6 @@ pub const NR52: u16 = 0xFF26;
 /// Bit 0 = Background and Window enable/priority : 0=off, 1=on
 pub const LCDC: u16 = 0xFF40;
 
-
 /// LCD Status register
 /// Bit 7 = unused
 /// Bit 6 = LY pub consterrupt source : 0=off, 1=on
@@ -137,32 +128,26 @@ pub const LCDC: u16 = 0xFF40;
 /// Bit 1, 0 = Mode Flag : 00=HBlank, 01=VBlank, 10=OAMSearch, 11=PixelTransfer
 pub const LCD_STAT: u16 = 0xFF41;
 
-
 /// Background scroll Y register
 pub const SCROLL_Y: u16 = 0xFF42;
 
-
 /// Background scroll X register
 pub const SCROLL_X: u16 = 0xFF43;
-
 
 /// LCD Y line register
 /// LY indicates the current horizontal line, which might be about to be drawn, being drawn, or just been drawn. LY can hold any value from 0 to 153, with
 /// values from 144 to 153 indicating the VBlank period.
 pub const LCD_LY: u16 = 0xFF44;
 
-
 /// LCD Compare Y line register
 /// The Game Boy permanently compares the value of the LYC and LY registers. When both values are identical, the “LYC=LY” flag in the STAT register is set,
 /// and (if enabled) a STAT pub consterrupt is requested.
 pub const LCD_LYC: u16 = 0xFF45;
 
-
 /// Writing to this register launches a DMA transfer from ROM or RAM to OAM (Object Attribute Memory). The written value specifies the transfer source
 /// address divided by $100, that is, source and destination are:
 /// Source: $XX00-$XX9F ;XX = $00 to $DF Destination: $FE00-$FE9F
 pub const DMA: u16 = 0xFF46;
-
 
 /// BG Palette Data register
 /// Bit 7, 6 = Color for index 3
@@ -175,10 +160,8 @@ pub const OBP0: u16 = 0xFF48;
 
 pub const OBP1: u16 = 0xFF49;
 
-
 /// Window Y Position
 pub const WY: u16 = 0xFF4A;
-
 
 /// Window X Position + 7
 pub const WX: u16 = 0xFF4B;
@@ -186,7 +169,6 @@ pub const WX: u16 = 0xFF4B;
 pub const KEY1: u16 = 0xFF4D;
 
 pub const VBK: u16 = 0xFF4F;
-
 
 /// Set to non-zero to disable Boot Rom
 pub const DISABLE_BOOT_ROM: u16 = 0xFF50;
@@ -213,7 +195,6 @@ pub const OCPD: u16 = 0xFF6B;
 
 pub const SVBK: u16 = 0xFF70;
 
-
 /// Interrupt Enable register
 /// Bit 4 = Joypad : 0=disabled, 1=enabled
 /// Bit 3 = Serial : 0=disabled, 1=enabled
@@ -221,7 +202,6 @@ pub const SVBK: u16 = 0xFF70;
 /// Bit 1 = LCD STAT : 0=disabled, 1=enabled
 /// Bit 0 = VBlank : 0=disabled, 1=enabled
 pub const IE: u16 = 0xFFFF;
-
 
 pub trait Memory: Display {
     fn accepts_address(&self, address: u16) -> bool;
@@ -249,9 +229,3 @@ pub trait Memory: Display {
         self.write_byte(address, data);
     }
 }
-
-
-
-
-
-

@@ -23,10 +23,22 @@ impl Gameboy {
         let mut mmu = Mmu::new(mbc);
 
         // ADD MEMORY UNITS
-        mmu.add_memory_unit(Box::from(RandomAccessMemory::new("VRAM", 0x8000, 0xA000 - 0x8000)));
-        mmu.add_memory_unit(Box::from(RandomAccessMemory::new("OAM RAM", 0xFE00, 0xFEA0 - 0xFE00)));
+        mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
+            "VRAM",
+            0x8000,
+            0xA000 - 0x8000,
+        )));
+        mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
+            "OAM RAM",
+            0xFE00,
+            0xFEA0 - 0xFE00,
+        )));
         mmu.add_memory_unit(Box::from(Wram::new()));
-        mmu.add_memory_unit(Box::from(RandomAccessMemory::new("HRAM", 0xFF80, 0xFFFF - 0xFF80)));
+        mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
+            "HRAM",
+            0xFF80,
+            0xFFFF - 0xFF80,
+        )));
         // TODO ADD INTERRUPTS REGISTERS
         // TODO ADD TIMER & DIV
         // TODO ADD JOYPAD
@@ -38,9 +50,17 @@ impl Gameboy {
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("VBK", memory::VBK, 1)));
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("HDMA", memory::HDMA1, 5))); // HDMA
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("RP", memory::RP, 1))); // RP
-        mmu.add_memory_unit(Box::from(RandomAccessMemory::new("BCPS & BCPD & OCPS & OCPD", memory::BCPS, 4))); // BCPS & BCPD & OCPS & OCPD
+        mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
+            "BCPS & BCPD & OCPS & OCPD",
+            memory::BCPS,
+            4,
+        ))); // BCPS & BCPD & OCPS & OCPD
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("SVBK", memory::SVBK, 1))); // SVBK
-        mmu.add_memory_unit(Box::from(RandomAccessMemory::new("PROHIBITED AREA", 0xFEA0, 0x60))); // PROHIBITED AREA
+        mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
+            "PROHIBITED AREA",
+            0xFEA0,
+            0x60,
+        ))); // PROHIBITED AREA
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("? 1", 0xFF7F, 1))); // ?
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("? 2", 0xFF03, 1))); // ?
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("? 3", 0xFF08, 7))); // ?

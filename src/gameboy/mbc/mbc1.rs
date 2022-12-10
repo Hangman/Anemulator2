@@ -41,7 +41,8 @@ impl Mbc1 {
             let length = min(remaining, 0x4000);
             let start_index = cartridge_data.len() - remaining;
             let end_index = start_index + length;
-            result.rom_banks[bank_index][0..length].copy_from_slice(&cartridge_data[start_index..end_index]);
+            result.rom_banks[bank_index][0..length]
+                .copy_from_slice(&cartridge_data[start_index..end_index]);
             remaining -= length;
             bank_index += 1;
         }
@@ -52,7 +53,9 @@ impl Mbc1 {
 
 impl Memory for Mbc1 {
     fn accepts_address(&self, address: u16) -> bool {
-        address >= 0 && address < 0x8000 || address == memory::DISABLE_BOOT_ROM || address >= 0xA000 && address < 0xC000
+        address >= 0 && address < 0x8000
+            || address == memory::DISABLE_BOOT_ROM
+            || address >= 0xA000 && address < 0xC000
     }
 
     fn read_byte(&self, address: u16) -> u8 {
@@ -66,14 +69,16 @@ impl Memory for Mbc1 {
                     self.rom_banks[self.bank_select_register - 1][(address - 0x4000) as usize]
                 }
                 Mode::RAM => {
-                    self.rom_banks[(self.bank_select_register & 0b11111) - 1][(address - 0x4000) as usize]
+                    self.rom_banks[(self.bank_select_register & 0b11111) - 1]
+                        [(address - 0x4000) as usize]
                 }
             };
         }
 
         if address >= 0xA000 && address < 0xC000 {
             if self.ram_enabled && self.mode == Mode::RAM {
-                return self.ram_banks[(self.bank_select_register & 0b1111111) >> 5][(address - 0xA000) as usize];
+                return self.ram_banks[(self.bank_select_register & 0b1111111) >> 5]
+                    [(address - 0xA000) as usize];
             }
             return self.ram_banks[0][(address - 0xA000) as usize];
         }
@@ -99,7 +104,8 @@ impl Memory for Mbc1 {
             self.bank_select_register = self.bank_select_register & 0b1100000 | (value as usize);
         } else if address >= 0x4000 && address < 0x6000 {
             // SELECT RAM BANK NUMBER OR UPPER BITS OF ROM BANK NUMBER
-            self.bank_select_register = self.bank_select_register & 0b11111 | ((value as usize) & 0b11) << 5;
+            self.bank_select_register =
+                self.bank_select_register & 0b11111 | ((value as usize) & 0b11) << 5;
             if self.bank_select_register == 0 {
                 self.bank_select_register = 1;
             }
@@ -113,7 +119,8 @@ impl Memory for Mbc1 {
         } else if address >= 0xA000 && address < 0xC000 {
             // WRITE TO EXTERNAL RAM
             if self.mode == Mode::RAM {
-                self.ram_banks[(self.bank_select_register & 0b1111111) >> 5][(address as usize) - 0xA000] = value;
+                self.ram_banks[(self.bank_select_register & 0b1111111) >> 5]
+                    [(address as usize) - 0xA000] = value;
             } else {
                 self.ram_banks[0][(address as usize) - 0xA000] = value;
             }

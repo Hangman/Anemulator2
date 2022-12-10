@@ -44,4 +44,3 @@ impl Memory for Wram {
         }
     }
 }
-
