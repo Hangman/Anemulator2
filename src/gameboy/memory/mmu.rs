@@ -21,21 +21,15 @@ impl Mmu {
     }
 
     fn get_unit(&self, address: u16) -> Option<&Box<dyn Memory>> {
-        for unit in self.unit_lut.iter() {
-            if unit.accepts_address(address) {
-                return Some(unit);
-            }
-        }
-        None
+        self.unit_lut
+            .iter()
+            .find(|&unit| unit.accepts_address(address))
     }
 
     fn get_mut_unit(&mut self, address: u16) -> Option<&mut Box<dyn Memory>> {
-        for unit in self.unit_lut.iter_mut() {
-            if unit.accepts_address(address) {
-                return Some(unit);
-            }
-        }
-        None
+        self.unit_lut
+            .iter_mut()
+            .find(|unit| unit.accepts_address(address))
     }
 }
 

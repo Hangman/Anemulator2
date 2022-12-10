@@ -53,13 +53,13 @@ impl Mbc1 {
 
 impl Memory for Mbc1 {
     fn accepts_address(&self, address: u16) -> bool {
-        address >= 0 && address < 0x8000
+        address < 0x8000
             || address == memory::DISABLE_BOOT_ROM
             || address >= 0xA000 && address < 0xC000
     }
 
     fn read_byte(&self, address: u16) -> u8 {
-        if !self.booted && address >= 0x0000 && address <= 0x00FF {
+        if !self.booted && address <= 0x00FF {
             return mbc::BOOT_ROM[address as usize];
         }
 
@@ -91,7 +91,7 @@ impl Memory for Mbc1 {
     }
 
     fn write_byte(&mut self, address: u16, mut value: u8) {
-        if address >= 0x0000 && address < 0x2000 {
+        if address < 0x2000 {
             // ENABLE/DISABLE RAM
             value &= 0xF;
             self.ram_enabled = value == 0x0A;

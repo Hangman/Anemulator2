@@ -26,7 +26,7 @@ impl Display for Wram {
 
 impl Memory for Wram {
     fn accepts_address(&self, address: u16) -> bool {
-        address >= 0xC000 && address < 0xFE00
+        (0xC000..0xFE00).contains(&address)
     }
 
     fn read_byte(&self, address: u16) -> u8 {
@@ -37,7 +37,7 @@ impl Memory for Wram {
         self.write_internal(address, value);
 
         // ECHO
-        if address >= 0xC000 && address <= 0xDDFF {
+        if (0xC000..=0xDDFF).contains(&address) {
             self.write_internal(address + 0x2000, value);
         } else if address >= 0xE000 {
             self.write_internal(address - 0x2000, value);
