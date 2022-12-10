@@ -22,7 +22,7 @@ impl Mbc1 {
         let mut result = Self {
             rom_banks: Box::new([[0; 128]; 0x4000]),
             ram_banks: Box::new([[0; 4]; 0x2000]),
-            mode: Mode::ROM,
+            mode: Mode::Rom,
             bank_select_register: 1,
             ram_enabled: false,
             booted: false,
@@ -55,7 +55,7 @@ impl Memory for Mbc1 {
     fn accepts_address(&self, address: u16) -> bool {
         address < 0x8000
             || address == memory::DISABLE_BOOT_ROM
-            || address >= 0xA000 && address < 0xC000
+            || (0xA000..0xC000).contains(&address)
     }
 
     fn read_byte(&self, address: u16) -> u8 {
@@ -63,20 +63,20 @@ impl Memory for Mbc1 {
             return mbc::BOOT_ROM[address as usize];
         }
 
-        if address >= 0x4000 && address < 0x8000 {
+        if (0x4000..0x8000).contains(&address) {
             return match self.mode {
-                Mode::ROM => {
+                Mode::Rom => {
                     self.rom_banks[self.bank_select_register - 1][(address - 0x4000) as usize]
                 }
-                Mode::RAM => {
+                Mode::Ram => {
                     self.rom_banks[(self.bank_select_register & 0b11111) - 1]
                         [(address - 0x4000) as usize]
                 }
             };
         }
 
-        if address >= 0xA000 && address < 0xC000 {
-            if self.ram_enabled && self.mode == Mode::RAM {
+        if (0xA000..0xC000).contains(&address) {
+            if self.ram_enabled && self.mode == Mode::Ram {
                 return self.ram_banks[(self.bank_select_register & 0b1111111) >> 5]
                     [(address - 0xA000) as usize];
             }
@@ -95,30 +95,30 @@ impl Memory for Mbc1 {
             // ENABLE/DISABLE RAM
             value &= 0xF;
             self.ram_enabled = value == 0x0A;
-        } else if address >= 0x2000 && address < 0x4000 {
+        } else if (0x2000..0x4000).contains(&address) {
             // SELECT ROM BANK NUMBER (LOWER 5 BITS)
             value &= 0b11111;
             if value == 0 {
                 value = 1;
             }
             self.bank_select_register = self.bank_select_register & 0b1100000 | (value as usize);
-        } else if address >= 0x4000 && address < 0x6000 {
+        } else if (0x4000..0x6000).contains(&address) {
             // SELECT RAM BANK NUMBER OR UPPER BITS OF ROM BANK NUMBER
             self.bank_select_register =
                 self.bank_select_register & 0b11111 | ((value as usize) & 0b11) << 5;
             if self.bank_select_register == 0 {
                 self.bank_select_register = 1;
             }
-        } else if address >= 0x6000 && address < 0x8000 {
+        } else if (0x6000..0x8000).contains(&address) {
             // SET MODE
             if (value & 0b11) == 0 {
-                self.mode = Mode::ROM;
+                self.mode = Mode::Rom;
             } else if (value & 0b11) == 1 {
-                self.mode = Mode::RAM;
+                self.mode = Mode::Ram;
             }
-        } else if address >= 0xA000 && address < 0xC000 {
+        } else if (0xA000..0xC000).contains(&address) {
             // WRITE TO EXTERNAL RAM
-            if self.mode == Mode::RAM {
+            if self.mode == Mode::Ram {
                 self.ram_banks[(self.bank_select_register & 0b1111111) >> 5]
                     [(address as usize) - 0xA000] = value;
             } else {
@@ -158,6 +158,6 @@ impl Mbc for Mbc1 {
 
 #[derive(PartialEq)]
 enum Mode {
-    ROM,
-    RAM,
+    Rom,
+    Ram,
 }
