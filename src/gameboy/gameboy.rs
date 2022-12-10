@@ -1,29 +1,31 @@
 use crate::gameboy::cpu::Cpu;
+use crate::gameboy::mbc::rom_loader;
 use crate::gameboy::memory::mmu::Mmu;
 use crate::gameboy::memory::random_access_memory::RandomAccessMemory;
+use crate::gameboy::memory::wram::Wram;
 use crate::gameboy::ppu::Ppu;
 use crate::gameboy::ram::memory;
-use crate::gameboy::memory::wram::Wram;
 
 pub struct Gameboy {
     cpu: Cpu,
     ppu: Ppu,
     // apu: Apu,
-    // mbc: Mbc
+    game_name: String,
     mmu: Mmu,
     // timer: Timer,
     // joypad: Joypad,
 }
 
 impl Gameboy {
-    pub fn new() -> Self {
-        let mut mmu = Mmu::new();
+    pub fn new(path: String) -> Self {
+        let mbc = rom_loader::load(path);
+        let game_name = mbc.get_game_name();
+        let mut mmu = Mmu::new(mbc);
 
         // ADD MEMORY UNITS
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("VRAM", 0x8000, 0xA000 - 0x8000)));
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("OAM RAM", 0xFE00, 0xFEA0 - 0xFE00)));
         mmu.add_memory_unit(Box::from(Wram::new()));
-        // TODO ADD MBC
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("HRAM", 0xFF80, 0xFFFF - 0xFF80)));
         // TODO ADD INTERRUPTS REGISTERS
         // TODO ADD TIMER & DIV
@@ -51,6 +53,7 @@ impl Gameboy {
         Self {
             cpu: Cpu::new(),
             ppu: Ppu::new(),
+            game_name,
             mmu,
         }
     }

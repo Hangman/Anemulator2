@@ -35,7 +35,7 @@ fn main() {
 
     let mut event_pump = sdl.event_pump().expect("failed to get the event_pump");
 
-    let gameboy = Gameboy::new();
+    let gameboy = Gameboy::new(String::from("test.rom"));
 
     'main: loop {
         let start = Instant::now();

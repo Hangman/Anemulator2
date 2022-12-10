@@ -1,5 +1,6 @@
 use std::cmp::min;
 use std::fmt::{Display, Formatter};
+
 use crate::gameboy::mbc::mbc;
 use crate::gameboy::mbc::mbc::Mbc;
 use crate::gameboy::ram::memory;
@@ -17,7 +18,7 @@ pub struct Mbc1 {
 }
 
 impl Mbc1 {
-    fn new(cartridge_data: &[u8]) -> Self {
+    pub fn new(cartridge_data: &[u8]) -> Self {
         let mut result = Self {
             rom_banks: Box::new([[0; 128]; 0x4000]),
             ram_banks: Box::new([[0; 4]; 0x2000]),

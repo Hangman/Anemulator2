@@ -1,14 +1,17 @@
 use std::fmt::{Display, Formatter};
+use crate::gameboy::mbc::mbc::Mbc;
 
 use crate::gameboy::ram::memory::Memory;
 
 pub struct Mmu {
+    mbc: Box<dyn Mbc>,
     unit_lut: Vec<Box<dyn Memory>>,
 }
 
 impl Mmu {
-    pub fn new() -> Self {
+    pub fn new(mbc: Box<dyn Mbc>) -> Self {
         Self {
+            mbc,
             unit_lut: Vec::new(),
         }
     }
@@ -43,17 +46,23 @@ impl Display for Mmu {
 }
 
 impl Memory for Mmu {
-    fn accepts_address(&self, address: u16) -> bool {
-        let unit = self.get_unit(address).unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
-        unit.accepts_address(address)
+    fn accepts_address(&self, _address: u16) -> bool {
+        true
     }
 
     fn read_byte(&self, address: u16) -> u8 {
+        if self.mbc.accepts_address(address) {
+            return self.mbc.read_byte(address);
+        }
         let unit = self.get_unit(address).unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
         unit.read_byte(address)
     }
 
     fn write_byte(&mut self, address: u16, value: u8) {
+        if self.mbc.accepts_address(address) {
+            self.mbc.write_byte(address, value);
+            return;
+        }
         let unit = self.get_mut_unit(address).unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
         unit.write_byte(address, value);
     }
