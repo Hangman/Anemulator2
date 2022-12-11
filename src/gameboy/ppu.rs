@@ -189,7 +189,7 @@ impl Ppu {
         let y = obj_y - 16;
         let x = obj_x - 8;
         let line = scanline as i16;
-        x >= -8 && x < 160 + 8 && line >= y && line < y + obj_height
+        (-8..168).contains(&x) && line >= y && line < y + obj_height
     }
 
     fn get_bg_color(&self, color_index: u16) -> (f32, f32, f32, f32) {
