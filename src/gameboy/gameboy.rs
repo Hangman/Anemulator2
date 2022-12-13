@@ -81,6 +81,7 @@ impl Gameboy {
         // this.timer.step();
         // this.cpu.step();
         // this.apu.step();
+        self.mmu.step();
         self.ppu.step(&mut self.mmu)
     }
 }

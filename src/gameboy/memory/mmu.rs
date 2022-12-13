@@ -9,6 +9,7 @@ pub struct Mmu {
     mbc: Box<dyn Mbc>,
     timer: Timer,
     unit_lut: Vec<Box<dyn Memory>>,
+    dma: u8,
 }
 
 impl Mmu {
@@ -17,6 +18,7 @@ impl Mmu {
             mbc,
             timer: Timer::new(),
             unit_lut: Vec::new(),
+            dma: 0,
         }
     }
 
@@ -41,6 +43,13 @@ impl Mmu {
             self.write_byte(memory::IF, if_reg);
         }
     }
+
+    fn dma_transfer(&mut self) {
+        let source_address = (self.dma as u16) << 8;
+        for i in 0..0xA0 {
+            self.write_byte(0xFE00 + i, self.read_byte(source_address + i));
+        }
+    }
 }
 
 impl Memory for Mmu {
@@ -49,6 +58,9 @@ impl Memory for Mmu {
     }
 
     fn read_byte(&self, address: u16) -> u8 {
+        if address == memory::DMA {
+            return self.dma;
+        }
         if self.mbc.accepts_address(address) {
             return self.mbc.read_byte(address);
         }
@@ -62,6 +74,10 @@ impl Memory for Mmu {
     }
 
     fn write_byte(&mut self, address: u16, value: u8) {
+        if address == memory::DMA {
+            self.dma = value;
+            self.dma_transfer();
+        }
         if self.mbc.accepts_address(address) {
             self.mbc.write_byte(address, value);
             return;
