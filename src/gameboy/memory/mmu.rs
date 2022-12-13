@@ -1,7 +1,7 @@
 use crate::gameboy::mbc::mbc::Mbc;
 use std::fmt::{Display, Formatter};
 
-use crate::gameboy::ram::memory::Memory;
+use crate::gameboy::memory::memory::Memory;
 
 pub struct Mmu {
     mbc: Box<dyn Mbc>,

@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use crate::gameboy::ram::memory::Memory;
+use crate::gameboy::memory::memory::Memory;
 
 pub struct Wram {
     memory: Box<[u8; 0xFE00 - 0xC000]>,

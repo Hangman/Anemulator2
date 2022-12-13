@@ -1,11 +1,11 @@
 use crate::gameboy::cpu::Cpu;
 use crate::gameboy::mbc::rom_loader;
 use crate::gameboy::memory::interrupt_registers::InterruptRegisters;
+use crate::gameboy::memory::memory;
 use crate::gameboy::memory::mmu::Mmu;
 use crate::gameboy::memory::random_access_memory::RandomAccessMemory;
 use crate::gameboy::memory::wram::Wram;
 use crate::gameboy::ppu::Ppu;
-use crate::gameboy::ram::memory;
 
 pub struct Gameboy {
     cpu: Cpu,

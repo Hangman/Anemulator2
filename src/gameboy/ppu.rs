@@ -1,8 +1,8 @@
 use std::fmt::{Display, Formatter};
 
+use crate::gameboy::memory::memory;
+use crate::gameboy::memory::memory::Memory;
 use crate::gameboy::memory::mmu::Mmu;
-use crate::gameboy::ram::memory;
-use crate::gameboy::ram::memory::Memory;
 use crate::gameboy::util::color::Color;
 
 pub struct Ppu {

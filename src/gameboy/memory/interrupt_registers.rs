@@ -1,7 +1,7 @@
 use std::fmt::{Display, Formatter};
 
-use crate::gameboy::ram::memory;
-use crate::gameboy::ram::memory::Memory;
+use crate::gameboy::memory::memory;
+use crate::gameboy::memory::memory::Memory;
 
 pub struct InterruptRegisters {
     if_reg: u8,

@@ -1,5 +1,7 @@
 #![windows_subsystem = "windows"]
 
+extern crate core;
+
 use std::time::Instant;
 
 use pixels::{PixelsBuilder, SurfaceTexture};

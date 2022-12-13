@@ -3,8 +3,8 @@ use std::fmt::{Display, Formatter};
 
 use crate::gameboy::mbc::mbc;
 use crate::gameboy::mbc::mbc::Mbc;
-use crate::gameboy::ram::memory;
-use crate::gameboy::ram::memory::Memory;
+use crate::gameboy::memory::memory;
+use crate::gameboy::memory::memory::Memory;
 
 pub struct Mbc1 {
     rom_banks: Box<[[u8; 128]; 0x4000]>,
