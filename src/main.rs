@@ -1,12 +1,14 @@
 #![windows_subsystem = "windows"]
 
-mod gameboy;
+use std::time::Instant;
 
-use crate::gameboy::gameboy::Gameboy;
 use pixels::{PixelsBuilder, SurfaceTexture};
 use sdl2::audio::{AudioQueue, AudioSpecDesired};
 use sdl2::event::{Event, WindowEvent};
-use std::time::Instant;
+
+use crate::gameboy::gameboy::Gameboy;
+
+mod gameboy;
 
 fn main() {
     println!("Starting Anemulator2");
@@ -48,7 +50,7 @@ fn main() {
 
     let mut event_pump = sdl.event_pump().expect("failed to get the event_pump");
 
-    let gameboy = Gameboy::new(String::from("test.rom"));
+    let mut gameboy = Gameboy::new(String::from("test.rom"));
 
     'main: loop {
         let start = Instant::now();
@@ -87,6 +89,10 @@ fn main() {
 
                 _ => {}
             }
+        }
+
+        while !gameboy.step() {
+            // do something
         }
 
         pixels.render().expect("failed to render framebuffer");

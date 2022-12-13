@@ -88,18 +88,18 @@ impl Ppu {
             self.was_off = false;
 
             if self.cycle_accumulator > 0 {
-                let old_mode = self.state.clone();
+                let old_mode = self.state;
                 match old_mode {
-                    OAM_SEARCH => {
+                    PpuMode::OamSearch => {
                         self.oam_search(mmu);
                     }
-                    PixelTransfer => {
+                    PpuMode::PixelTransfer => {
                         self.pixel_transfer(mmu);
                     }
-                    HBlank => {
+                    PpuMode::HBlank => {
                         self.h_blank(mmu);
                     }
-                    VBlank => {
+                    PpuMode::VBlank => {
                         self.v_blank(mmu);
                     }
                 }
@@ -113,7 +113,7 @@ impl Ppu {
             self.was_off = true;
         }
 
-        return false;
+        false
     }
 
     fn pixel_transfer(&mut self, mmu: &mut Mmu) {
@@ -154,13 +154,11 @@ impl Ppu {
 
         for pixel_x in 0u8..160 {
             // FIND TILE ADDRESS
-            let mut bg_map_x: u8 = pixel_x + scroll_x;
-            if bg_map_x >= 256 {
-                bg_map_x -= 256;
-            }
+            let bg_map_x: u8 = pixel_x + scroll_x;
             let bg_map_block_x: u8 = bg_map_x / 8;
             let tile_pixel_x: u8 = bg_map_x % 8;
-            let tile_address: u16 = bg_map_start_address + bg_map_block_y as u16 * 32 + bg_map_block_x as u16;
+            let tile_address: u16 =
+                bg_map_start_address + bg_map_block_y as u16 * 32 + bg_map_block_x as u16;
 
             // READ TILE DATA
             if tile_address != last_tile_address {
@@ -179,7 +177,8 @@ impl Ppu {
             }
 
             // FETCH COLOR
-            let color_palette_index: u16 = self.get_color_palette_index_of_tile_pixel(tile_pixel_x as i16, tile_pixel_y as i16);
+            let color_palette_index: u16 = self
+                .get_color_palette_index_of_tile_pixel(tile_pixel_x as i16, tile_pixel_y as i16);
             let color: Color = self.get_bg_color(color_palette_index);
 
             // RENDER
@@ -189,7 +188,11 @@ impl Ppu {
     }
 
     fn render_window(&mut self, mmu: &Mmu, scanline: u8, atlas_address_mode: bool) {
-        let window_map_start_address: u16 = if self.is_bit_set(memory::LCDC, 6) { 0x9C00 } else { 0x9800 };
+        let window_map_start_address: u16 = if self.is_bit_set(memory::LCDC, 6) {
+            0x9C00
+        } else {
+            0x9800
+        };
         let wx: i16 = self.read_byte(memory::WX) as i16 - 7;
         let wy: i16 = self.read_byte(memory::WY) as i16;
         let mut last_tile_address: u16 = u16::MAX;
@@ -201,24 +204,29 @@ impl Ppu {
                 let pixel_x = x - wx;
                 let tile_pixel_x = pixel_x % 8;
                 let tile_pixel_y = window_line % 8;
-                let tile_address: u16 = (window_map_start_address as i16 + window_line / 8 * 32 + pixel_x / 8) as u16;
+                let tile_address: u16 =
+                    (window_map_start_address as i16 + window_line / 8 * 32 + pixel_x / 8) as u16;
 
-                if pixel_x >= 0 && pixel_x < 160 {
+                if (0..160).contains(&pixel_x) {
                     // READ TILE DATA
                     if tile_address != last_tile_address {
                         let atlas_tile_index = mmu.read_byte(tile_address);
-                        let atlas_tile_address: u16 = if atlas_address_mode { 0x8000 + atlas_tile_index as u16 * 16 } else {
+                        let atlas_tile_address: u16 = if atlas_address_mode {
+                            0x8000 + atlas_tile_index as u16 * 16
+                        } else {
                             0x9000 + atlas_tile_index as u16 * 16
                         };
 
                         for i in 0..16 {
-                            self.tile_cache[i as usize] = mmu.read_byte(atlas_tile_address + i) as i32;
+                            self.tile_cache[i as usize] =
+                                mmu.read_byte(atlas_tile_address + i) as i32;
                         }
                         last_tile_address = tile_address;
                     }
 
                     // FETCH COLOR
-                    let color_palette_index = self.get_color_palette_index_of_tile_pixel(tile_pixel_x, tile_pixel_y);
+                    let color_palette_index =
+                        self.get_color_palette_index_of_tile_pixel(tile_pixel_x, tile_pixel_y);
                     let color = self.get_bg_color(color_palette_index);
 
                     // RENDER
@@ -253,7 +261,9 @@ impl Ppu {
                 };
                 let y_in_tile = scanline as i16 - obj_y;
                 let y_in_first_tile = y_in_tile < 8;
-                let atlas_address_modificator = if !y_in_first_tile && !flip_y || y_in_first_tile && obj_height == 16 && flip_y {
+                let atlas_address_modificator = if !y_in_first_tile && !flip_y
+                    || y_in_first_tile && obj_height == 16 && flip_y
+                {
                     16
                 } else {
                     0
@@ -272,7 +282,9 @@ impl Ppu {
 
                 // FETCH TILE PIXELS FROM ATLAS
                 for j in 0..16 {
-                    self.tile_cache[j] = mmu.read_byte(atlas_tile_address + atlas_address_modificator + j as u16) as i32;
+                    self.tile_cache[j] = mmu
+                        .read_byte(atlas_tile_address + atlas_address_modificator + j as u16)
+                        as i32;
                 }
 
                 self.draw_object_line(
@@ -305,14 +317,17 @@ impl Ppu {
     ) {
         for pixel_x in 0..8 {
             let tile_pixel_x = if flip_x { 7 - pixel_x } else { pixel_x };
-            let color_palette_index = self.get_color_palette_index_of_tile_pixel(tile_pixel_x, tile_pixel_y);
+            let color_palette_index =
+                self.get_color_palette_index_of_tile_pixel(tile_pixel_x, tile_pixel_y);
             let color = Ppu::get_object_color(mmu, palette_address, color_palette_index);
 
             let render_x = x + pixel_x;
             if render_x >= 160 {
                 return;
             }
-            if render_x >= 0 && (priority || self.back_buffer[render_x as usize][scanline as usize] == 0) {
+            if render_x >= 0
+                && (priority || self.back_buffer[render_x as usize][scanline as usize] == 0)
+            {
                 self.front_buffer[(x + pixel_x) as usize][scanline as usize] = color;
             }
         }
@@ -424,7 +439,17 @@ impl Ppu {
 
 impl Memory for Ppu {
     fn accepts_address(&self, address: u16) -> bool {
-        address == memory::LCDC || address == memory::LCD_STAT || address == memory::LCD_LY || address == memory::LCD_LYC || address == memory::SCROLL_X || address == memory::SCROLL_Y || address == memory::BGP || address == memory::OBP0 || address == memory::OBP1 || address == memory::WX || address == memory::WY
+        address == memory::LCDC
+            || address == memory::LCD_STAT
+            || address == memory::LCD_LY
+            || address == memory::LCD_LYC
+            || address == memory::SCROLL_X
+            || address == memory::SCROLL_Y
+            || address == memory::BGP
+            || address == memory::OBP0
+            || address == memory::OBP1
+            || address == memory::WX
+            || address == memory::WY
     }
 
     fn read_byte(&self, address: u16) -> u8 {
@@ -477,7 +502,7 @@ impl Display for Ppu {
     }
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone, Copy, PartialEq)]
 enum PpuMode {
     OamSearch,
     PixelTransfer,

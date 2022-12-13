@@ -77,4 +77,11 @@ impl Gameboy {
             mmu,
         }
     }
+
+    pub fn step(&mut self) -> bool {
+        // this.timer.step();
+        // this.cpu.step();
+        // this.apu.step();
+        self.ppu.step(&mut self.mmu)
+    }
 }
