@@ -1,5 +1,6 @@
 use crate::gameboy::cpu::Cpu;
 use crate::gameboy::mbc::rom_loader;
+use crate::gameboy::memory::interrupt_registers::InterruptRegisters;
 use crate::gameboy::memory::mmu::Mmu;
 use crate::gameboy::memory::random_access_memory::RandomAccessMemory;
 use crate::gameboy::memory::wram::Wram;
@@ -39,7 +40,7 @@ impl Gameboy {
             0xFF80,
             0xFFFF - 0xFF80,
         )));
-        // TODO ADD INTERRUPTS REGISTERS
+        mmu.add_memory_unit(Box::from(InterruptRegisters::new()));
         // TODO ADD TIMER & DIV
         // TODO ADD JOYPAD
         // TODO ADD DMA
