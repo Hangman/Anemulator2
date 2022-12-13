@@ -41,7 +41,6 @@ impl Gameboy {
         )));
         mmu.add_memory_unit(Box::from(InterruptRegisters::new()));
         // TODO ADD JOYPAD
-        // TODO ADD DMA
         // TODO ADD PPU
         // TODO ADD SERIAL BUS
         // TODO ADD APU
