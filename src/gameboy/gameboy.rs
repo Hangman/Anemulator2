@@ -6,7 +6,6 @@ use crate::gameboy::memory::mmu::Mmu;
 use crate::gameboy::memory::random_access_memory::RandomAccessMemory;
 use crate::gameboy::memory::wram::Wram;
 use crate::gameboy::ppu::Ppu;
-use crate::gameboy::timer::Timer;
 
 pub struct Gameboy {
     cpu: Cpu,
