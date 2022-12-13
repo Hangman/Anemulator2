@@ -6,6 +6,7 @@ use crate::gameboy::memory::mmu::Mmu;
 use crate::gameboy::memory::random_access_memory::RandomAccessMemory;
 use crate::gameboy::memory::wram::Wram;
 use crate::gameboy::ppu::Ppu;
+use crate::gameboy::timer::Timer;
 
 pub struct Gameboy {
     cpu: Cpu,
@@ -13,7 +14,6 @@ pub struct Gameboy {
     // apu: Apu,
     game_name: String,
     mmu: Mmu,
-    // timer: Timer,
     // joypad: Joypad,
 }
 
@@ -41,7 +41,6 @@ impl Gameboy {
             0xFFFF - 0xFF80,
         )));
         mmu.add_memory_unit(Box::from(InterruptRegisters::new()));
-        // TODO ADD TIMER & DIV
         // TODO ADD JOYPAD
         // TODO ADD DMA
         // TODO ADD PPU

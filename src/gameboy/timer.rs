@@ -3,9 +3,8 @@ use std::fmt::{Display, Formatter};
 use crate::gameboy::cpu::interrupt::Interrupt;
 use crate::gameboy::memory::memory;
 use crate::gameboy::memory::memory::Memory;
-use crate::gameboy::memory::mmu::Mmu;
 
-struct Timer {
+pub struct Timer {
     div: u8,
     tima: u8,
     tma: u8,
@@ -28,9 +27,9 @@ impl Timer {
         }
     }
 
-    pub fn step(&mut self, mmu: &mut Mmu) {
+    pub fn step(&mut self, if_register: u8) -> Option<u8> {
         self.step_divider();
-        self.step_timer(mmu);
+        self.step_timer(if_register)
     }
 
     fn step_divider(&mut self) {
@@ -41,7 +40,7 @@ impl Timer {
         }
     }
 
-    fn step_timer(&mut self, mmu: &mut Mmu) {
+    fn step_timer(&mut self, if_register: u8) -> Option<u8> {
         if (self.tac & 0b100) > 0 {
             self.accumulator += 4;
             let required_clocks = self.required_clocks();
@@ -51,8 +50,7 @@ impl Timer {
                 match timer.checked_add(1) {
                     None => {
                         self.tima = self.tma;
-                        let if_reg = mmu.read_byte(memory::IF);
-                        mmu.write_byte(memory::IF, if_reg | (1 << Interrupt::Timer.bit_number()));
+                        return Option::from(if_register | (1 << Interrupt::Timer.bit_number()));
                     }
                     Some(result) => {
                         self.tima = result;
@@ -60,6 +58,7 @@ impl Timer {
                 }
             }
         }
+        None
     }
 
     fn required_clocks(&self) -> usize {
