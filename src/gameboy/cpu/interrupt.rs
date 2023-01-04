@@ -1,3 +1,6 @@
+use strum_macros::EnumIter;
+
+#[derive(Debug, EnumIter)]
 pub enum Interrupt {
     VBlank,
     LcdStat,
@@ -17,11 +20,11 @@ impl Interrupt {
         }
     }
 
-    pub fn flag_mask(&self) -> u16 {
+    pub fn flag_mask(&self) -> u8 {
         1 << self.bit_number()
     }
 
-    pub fn bit_number(&self) -> u8 {
+    pub fn bit_number(&self) -> usize {
         match self {
             Interrupt::VBlank => 0,
             Interrupt::LcdStat => 1,

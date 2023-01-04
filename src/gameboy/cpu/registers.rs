@@ -7,13 +7,30 @@ pub struct Registers {
     pub e: u8,
     pub h: u8,
     pub l: u8,
-    pc: u16,
-    sp: u16,
+    pub pc: u16,
+    pub sp: u16,
     interrupts_enabled: bool,
     enable_interrupts_delay_counter: i8,
 }
 
 impl Registers {
+    pub fn new() -> Self {
+        Self {
+            a: 0,
+            f: 0,
+            b: 0,
+            c: 0,
+            d: 0,
+            e: 0,
+            h: 0,
+            l: 0,
+            pc: 0,
+            sp: 0xFFFE,
+            interrupts_enabled: false,
+            enable_interrupts_delay_counter: 0,
+        }
+    }
+
     #[inline]
     pub fn get_f(&self) -> u8 {
         self.f
@@ -90,6 +107,34 @@ impl Registers {
             self.f |= 1 << bit_index;
         } else {
             self.f &= !(1 << bit_index);
+        }
+    }
+
+    pub fn step(&mut self) {
+        if self.enable_interrupts_delay_counter > 0 {
+            self.enable_interrupts_delay_counter -= 1;
+            if self.enable_interrupts_delay_counter <= 0 {
+                self.interrupts_enabled = true;
+            }
+        }
+    }
+
+    #[inline]
+    pub fn is_interrupts_enabled(&self) -> bool {
+        self.interrupts_enabled
+    }
+
+    #[inline]
+    pub fn set_interrupts_enabled(&mut self, interrupts_enabled: bool, instant: bool) {
+        if interrupts_enabled {
+            if instant {
+                self.interrupts_enabled = true;
+            } else {
+                self.enable_interrupts_delay_counter = 2;
+            }
+        } else {
+            self.interrupts_enabled = false;
+            self.enable_interrupts_delay_counter = 0;
         }
     }
 }
