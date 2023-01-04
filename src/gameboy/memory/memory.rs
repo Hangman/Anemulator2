@@ -1,5 +1,8 @@
 use std::fmt::Display;
 
+use crate::gameboy::util::bit_util;
+use crate::gameboy::util::bit_util::get_bit;
+
 /// Joypad State register
 /// Bit 7 = unused
 /// Bit 6 = unused
@@ -216,16 +219,11 @@ pub trait Memory: Display {
     fn write_byte(&mut self, address: u16, value: u8);
 
     fn is_bit_set(&self, address: u16, bitnum: usize) -> bool {
-        (self.read_byte(address) & (1 << bitnum)) > 0
+        bit_util::is_bit_set_u8(self.read_byte(address), bitnum)
     }
 
     fn set_bit(&mut self, address: u16, bitnum: usize, value: bool) {
-        let mut data = self.read_byte(address);
-        if value {
-            data |= 1 << bitnum;
-        } else {
-            data &= !(1 << bitnum);
-        }
-        self.write_byte(address, data);
+        let result = bit_util::set_bit_u8(self.read_byte(address), bitnum, value);
+        self.write_byte(address, result);
     }
 }

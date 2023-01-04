@@ -1,8 +1,11 @@
+use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 
 use crate::gameboy::mbc::mbc::Mbc;
 use crate::gameboy::memory::memory;
 use crate::gameboy::memory::memory::Memory;
+use crate::gameboy::ppu::Ppu;
 use crate::gameboy::timer::Timer;
 
 pub struct Mmu {
@@ -10,15 +13,20 @@ pub struct Mmu {
     timer: Timer,
     unit_lut: Vec<Box<dyn Memory>>,
     dma: u8,
+    ppu: Ppu,
+    if_register: Rc<RefCell<u8>>,
 }
 
 impl Mmu {
     pub fn new(mbc: Box<dyn Mbc>) -> Self {
+        let if_reg = Rc::new(RefCell::new(0));
         Self {
             mbc,
-            timer: Timer::new(),
+            timer: Timer::new(Rc::clone(&if_reg)),
             unit_lut: Vec::new(),
             dma: 0,
+            ppu: Ppu::new(Rc::clone(&if_reg)),
+            if_register: if_reg,
         }
     }
 
@@ -38,10 +46,9 @@ impl Mmu {
             .find(|unit| unit.accepts_address(address))
     }
 
-    pub fn step(&mut self) {
-        if let Some(if_reg) = self.timer.step(self.read_byte(memory::IF)) {
-            self.write_byte(memory::IF, if_reg);
-        }
+    pub fn step(&mut self) -> bool {
+        self.timer.step();
+        self.ppu.step()
     }
 
     fn dma_transfer(&mut self) {
@@ -61,6 +68,12 @@ impl Memory for Mmu {
         if address == memory::DMA {
             return self.dma;
         }
+        if address == memory::IF {
+            return *self.if_register.borrow();
+        }
+        if self.ppu.accepts_address(address) {
+            return self.ppu.read_byte(address);
+        }
         if self.mbc.accepts_address(address) {
             return self.mbc.read_byte(address);
         }
@@ -77,6 +90,15 @@ impl Memory for Mmu {
         if address == memory::DMA {
             self.dma = value;
             self.dma_transfer();
+            return;
+        }
+        if address == memory::IF {
+            *(*self.if_register).borrow_mut() = value;
+            return;
+        }
+        if self.ppu.accepts_address(address) {
+            self.ppu.write_byte(address, value);
+            return;
         }
         if self.mbc.accepts_address(address) {
             self.mbc.write_byte(address, value);

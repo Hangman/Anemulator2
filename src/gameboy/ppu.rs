@@ -1,11 +1,15 @@
+use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 
 use crate::gameboy::memory::memory;
 use crate::gameboy::memory::memory::Memory;
-use crate::gameboy::memory::mmu::Mmu;
+use crate::gameboy::util::bit_util::set_bit;
 use crate::gameboy::util::color::Color;
 
 pub struct Ppu {
+    vram: [u8; 0x4000],
+    oam_ram: [u8; 0xA0],
     pub front_buffer: Box<[[Color; 160]; 144]>,
     back_buffer: Box<[[u16; 160]; 144]>,
     lcdc: u8,
@@ -23,6 +27,7 @@ pub struct Ppu {
     was_off: bool,
     state: PpuMode,
     tile_cache: [i32; 16],
+    if_register: Rc<RefCell<u8>>,
 }
 
 const WHITE: Color = Color {
@@ -58,8 +63,10 @@ const TRANSPARENT: Color = Color {
 const COLORS: [Color; 4] = [WHITE, LIGHT, DARK, BLACK];
 
 impl Ppu {
-    pub fn new() -> Self {
+    pub fn new(if_register: Rc<RefCell<u8>>) -> Self {
         Self {
+            vram: [0; 0x4000],
+            oam_ram: [0; 0xA0],
             front_buffer: Box::new([[TRANSPARENT; 160]; 144]),
             back_buffer: Box::new([[0; 160]; 144]),
             lcdc: 0,
@@ -77,10 +84,11 @@ impl Ppu {
             state: PpuMode::VBlank,
             was_off: false,
             tile_cache: [0; 16],
+            if_register,
         }
     }
 
-    pub fn step(&mut self, mmu: &mut Mmu) -> bool {
+    pub fn step(&mut self) -> bool {
         let ppu_on = self.is_bit_set(memory::LCDC, 7);
 
         if ppu_on {
@@ -91,16 +99,16 @@ impl Ppu {
                 let old_mode = self.state;
                 match old_mode {
                     PpuMode::OamSearch => {
-                        self.oam_search(mmu);
+                        self.oam_search();
                     }
                     PpuMode::PixelTransfer => {
-                        self.pixel_transfer(mmu);
+                        self.pixel_transfer();
                     }
                     PpuMode::HBlank => {
-                        self.h_blank(mmu);
+                        self.h_blank();
                     }
                     PpuMode::VBlank => {
-                        self.v_blank(mmu);
+                        self.v_blank();
                     }
                 }
                 if self.state == PpuMode::VBlank && old_mode != PpuMode::VBlank {
@@ -108,15 +116,15 @@ impl Ppu {
                 }
             }
         } else if !self.was_off {
-            self.set_line(mmu, 0);
-            self.set_state(mmu, PpuMode::HBlank);
+            self.set_line(0);
+            self.set_state(PpuMode::HBlank);
             self.was_off = true;
         }
 
         false
     }
 
-    fn pixel_transfer(&mut self, mmu: &mut Mmu) {
+    fn pixel_transfer(&mut self) {
         let render_bg = self.is_bit_set(memory::LCDC, 0);
         let render_window = self.is_bit_set(memory::LCDC, 5);
         let render_objects = self.is_bit_set(memory::LCDC, 1);
@@ -124,22 +132,22 @@ impl Ppu {
         let atlas_address_mode = self.is_bit_set(memory::LCDC, 4);
 
         if render_bg {
-            self.render_bg(mmu, scanline, atlas_address_mode);
+            self.render_bg(scanline, atlas_address_mode);
 
             if render_window {
-                self.render_window(mmu, scanline, atlas_address_mode);
+                self.render_window(scanline, atlas_address_mode);
             }
         }
 
         if render_objects {
-            self.render_objects(mmu, scanline);
+            self.render_objects(scanline);
         }
 
         self.cycle_accumulator -= 172;
-        self.set_state(mmu, PpuMode::HBlank);
+        self.set_state(PpuMode::HBlank);
     }
 
-    fn render_bg(&mut self, mmu: &Mmu, scanline: u8, atlas_address_mode: bool) {
+    fn render_bg(&mut self, scanline: u8, atlas_address_mode: bool) {
         let bg_map_start_address: u16 = if self.is_bit_set(memory::LCDC, 3) {
             0x9C00
         } else {
@@ -163,15 +171,15 @@ impl Ppu {
             // READ TILE DATA
             if tile_address != last_tile_address {
                 let atlas_tile_address: u16 = if atlas_address_mode {
-                    let atlas_tile_index = mmu.read_byte(tile_address as u16);
+                    let atlas_tile_index = self.read_byte(tile_address as u16);
                     0x8000 + atlas_tile_index as u16 * 16
                 } else {
-                    let atlas_tile_index = mmu.read_byte(tile_address);
+                    let atlas_tile_index = self.read_byte(tile_address);
                     0x9000 + atlas_tile_index as u16 * 16
                 };
 
                 for i in 0..16 {
-                    self.tile_cache[i] = mmu.read_byte(atlas_tile_address + i as u16) as i32;
+                    self.tile_cache[i] = self.read_byte(atlas_tile_address + i as u16) as i32;
                 }
                 last_tile_address = tile_address;
             }
@@ -187,7 +195,7 @@ impl Ppu {
         }
     }
 
-    fn render_window(&mut self, mmu: &Mmu, scanline: u8, atlas_address_mode: bool) {
+    fn render_window(&mut self, scanline: u8, atlas_address_mode: bool) {
         let window_map_start_address: u16 = if self.is_bit_set(memory::LCDC, 6) {
             0x9C00
         } else {
@@ -210,7 +218,7 @@ impl Ppu {
                 if (0..160).contains(&pixel_x) {
                     // READ TILE DATA
                     if tile_address != last_tile_address {
-                        let atlas_tile_index = mmu.read_byte(tile_address);
+                        let atlas_tile_index = self.read_byte(tile_address);
                         let atlas_tile_address: u16 = if atlas_address_mode {
                             0x8000 + atlas_tile_index as u16 * 16
                         } else {
@@ -219,7 +227,7 @@ impl Ppu {
 
                         for i in 0..16 {
                             self.tile_cache[i as usize] =
-                                mmu.read_byte(atlas_tile_address + i) as i32;
+                                self.read_byte(atlas_tile_address + i) as i32;
                         }
                         last_tile_address = tile_address;
                     }
@@ -237,7 +245,7 @@ impl Ppu {
         }
     }
 
-    fn render_objects(&mut self, mmu: &Mmu, scanline: u8) {
+    fn render_objects(&mut self, scanline: u8) {
         let obj_height: u8 = if self.is_bit_set(memory::LCDC, 2) {
             16
         } else {
@@ -245,11 +253,11 @@ impl Ppu {
         };
         for i in 0..40 {
             let oam_address: u16 = 0xFE00 + i * 4;
-            let obj_y: i16 = mmu.read_byte(oam_address) as i16 - 16;
-            let obj_x: i16 = mmu.read_byte(oam_address + 1) as i16 - 8;
+            let obj_y: i16 = self.read_byte(oam_address) as i16 - 16;
+            let obj_x: i16 = self.read_byte(oam_address + 1) as i16 - 8;
             if Ppu::is_object_visible(obj_x, obj_y, obj_height, scanline) {
-                let obj_tile_index = mmu.read_byte(oam_address + 2);
-                let obj_attributes = mmu.read_byte(oam_address + 3);
+                let obj_tile_index = self.read_byte(oam_address + 2);
+                let obj_attributes = self.read_byte(oam_address + 3);
                 let atlas_tile_address: u16 = 0x8000 + obj_tile_index as u16 * 16;
                 let flip_x = (obj_attributes & 0b100000) > 0;
                 let flip_y = (obj_attributes & 0b1000000) > 0;
@@ -282,13 +290,12 @@ impl Ppu {
 
                 // FETCH TILE PIXELS FROM ATLAS
                 for j in 0..16 {
-                    self.tile_cache[j] = mmu
+                    self.tile_cache[j] = self
                         .read_byte(atlas_tile_address + atlas_address_modificator + j as u16)
                         as i32;
                 }
 
                 self.draw_object_line(
-                    mmu,
                     obj_x,
                     tile_pixel_y,
                     flip_x,
@@ -307,7 +314,6 @@ impl Ppu {
 
     fn draw_object_line(
         &mut self,
-        mmu: &Mmu,
         x: i16,
         tile_pixel_y: i16,
         flip_x: bool,
@@ -319,7 +325,7 @@ impl Ppu {
             let tile_pixel_x = if flip_x { 7 - pixel_x } else { pixel_x };
             let color_palette_index =
                 self.get_color_palette_index_of_tile_pixel(tile_pixel_x, tile_pixel_y);
-            let color = Ppu::get_object_color(mmu, palette_address, color_palette_index);
+            let color = self.get_object_color(palette_address, color_palette_index);
 
             let render_x = x + pixel_x;
             if render_x >= 160 {
@@ -333,8 +339,8 @@ impl Ppu {
         }
     }
 
-    fn get_object_color(mmu: &Mmu, palette_address: u16, color_index: u16) -> Color {
-        let palette = mmu.read_byte(palette_address);
+    fn get_object_color(&self, palette_address: u16, color_index: u16) -> Color {
+        let palette = self.read_byte(palette_address);
         match color_index {
             3 => COLORS[(palette >> 6) as usize],
             2 => COLORS[(palette >> 4 & 0b11) as usize],
@@ -367,45 +373,45 @@ impl Ppu {
         (byte1 as u16) | (byte2 as u16) << 1
     }
 
-    fn oam_search(&mut self, mmu: &mut Mmu) {
+    fn oam_search(&mut self) {
         self.cycle_accumulator -= 80;
-        self.set_state(mmu, PpuMode::PixelTransfer);
+        self.set_state(PpuMode::PixelTransfer);
     }
 
-    fn h_blank(&mut self, mmu: &mut Mmu) {
+    fn h_blank(&mut self) {
         let scanline = self.read_byte(memory::LCD_LY);
-        self.set_line(mmu, scanline + 1);
+        self.set_line(scanline + 1);
         if scanline + 1 > 143 {
-            self.set_state(mmu, PpuMode::VBlank);
+            self.set_state(PpuMode::VBlank);
         } else {
-            self.set_state(mmu, PpuMode::OamSearch);
+            self.set_state(PpuMode::OamSearch);
         }
         self.cycle_accumulator -= 204;
     }
 
-    fn v_blank(&mut self, mmu: &mut Mmu) {
+    fn v_blank(&mut self) {
         let scanline = self.read_byte(memory::LCD_LY);
         if scanline + 1 > 153 {
-            self.set_line(mmu, 0);
-            self.set_state(mmu, PpuMode::OamSearch);
+            self.set_line(0);
+            self.set_state(PpuMode::OamSearch);
         } else {
-            self.set_line(mmu, scanline + 1);
+            self.set_line(scanline + 1);
         }
         self.cycle_accumulator -= 456;
     }
 
-    fn set_line(&mut self, mmu: &mut Mmu, number: u8) {
+    fn set_line(&mut self, number: u8) {
         self.write_byte(memory::LCD_LY, number);
-        let lyc: u8 = mmu.read_byte(memory::LCD_LYC);
+        let lyc: u8 = self.read_byte(memory::LCD_LYC);
         self.set_bit(memory::LCD_STAT, 2, number == lyc);
 
         // REQUEST INTERRUPT IF LYC = LY
         if self.is_bit_set(memory::LCD_STAT, 6) && number == lyc {
-            mmu.set_bit(memory::IF, 1, true);
+            set_bit!(self.if_register.borrow_mut(), 1);
         }
     }
 
-    fn set_state(&mut self, mmu: &mut Mmu, mode: PpuMode) {
+    fn set_state(&mut self, mode: PpuMode) {
         self.state = mode;
 
         // SET MODE BITS IN LCD_STAT REGISTER
@@ -416,22 +422,22 @@ impl Ppu {
             PpuMode::OamSearch => {
                 // REQUEST INTERRUPT IF OAM SEARCH IS ENABLED AS SOURCE OF INTERRUPTS
                 if self.is_bit_set(memory::LCD_STAT, 5) {
-                    mmu.set_bit(memory::IF, 1, true);
+                    set_bit!(self.if_register.borrow_mut(), 1);
                 }
             }
             PpuMode::PixelTransfer => {}
             PpuMode::HBlank => {
                 // REQUEST INTERRUPT IF HBLANK IS ENABLED AS SOURCE OF INTERRUPTS
                 if self.is_bit_set(memory::LCD_STAT, 3) {
-                    mmu.set_bit(memory::IF, 1, true);
+                    set_bit!(self.if_register.borrow_mut(), 1);
                 }
             }
             PpuMode::VBlank => {
                 // REQUEST INTERRUPT IF VBLANK IS ENABLED AS SOURCE OF INTERRUPTS
                 if self.is_bit_set(memory::LCD_STAT, 4) {
-                    mmu.set_bit(memory::IF, 1, true);
+                    set_bit!(self.if_register.borrow_mut(), 1);
                 }
-                mmu.set_bit(memory::IF, 0, true);
+                set_bit!(self.if_register.borrow_mut(), 0);
             }
         }
     }
@@ -450,6 +456,8 @@ impl Memory for Ppu {
             || address == memory::OBP1
             || address == memory::WX
             || address == memory::WY
+            || (address >= 0x8000 && address < 0xA000)
+            || (address >= 0xFE00 && address < 0xFEA0)
     }
 
     fn read_byte(&self, address: u16) -> u8 {
@@ -465,6 +473,8 @@ impl Memory for Ppu {
             memory::OBP1 => self.obp1,
             memory::WX => self.wx,
             memory::WY => self.wy,
+            0x8000..=0x9FFF => self.vram[(address - 0x8000) as usize],
+            0xFE00..=0xFE9F => self.oam_ram[(address - 0xFE00) as usize],
             _ => panic!("invalid read from address: {}", address),
         }
     }
@@ -491,6 +501,8 @@ impl Memory for Ppu {
             memory::LCD_LY => {
                 // ignore, writing is not allowed from outside
             }
+            0x8000..=0x9FFF => self.vram[(address - 0x8000) as usize] = value,
+            0xFE00..=0xFE9F => self.oam_ram[(address - 0xFE00) as usize] = value,
             _ => panic!("invalid write to address: {}", address),
         }
     }

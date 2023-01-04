@@ -1,8 +1,11 @@
+use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
+use std::rc::Rc;
 
 use crate::gameboy::cpu::interrupt::Interrupt;
 use crate::gameboy::memory::memory;
 use crate::gameboy::memory::memory::Memory;
+use crate::gameboy::util::bit_util::set_bit;
 
 pub struct Timer {
     div: u8,
@@ -11,12 +14,13 @@ pub struct Timer {
     tac: u8,
     accumulator: usize,
     divider_accumulator: usize,
+    if_register: Rc<RefCell<u8>>,
 }
 
 const CLOCKS_PER_DIVIDER_INC: usize = 256;
 
 impl Timer {
-    pub fn new() -> Self {
+    pub fn new(if_register: Rc<RefCell<u8>>) -> Self {
         Self {
             div: 0x18,
             tima: 0x00,
@@ -24,12 +28,13 @@ impl Timer {
             tac: 0xF8,
             accumulator: 0,
             divider_accumulator: 0,
+            if_register,
         }
     }
 
-    pub fn step(&mut self, if_register: u8) -> Option<u8> {
+    pub fn step(&mut self) {
         self.step_divider();
-        self.step_timer(if_register)
+        self.step_timer();
     }
 
     fn step_divider(&mut self) {
@@ -40,7 +45,7 @@ impl Timer {
         }
     }
 
-    fn step_timer(&mut self, if_register: u8) -> Option<u8> {
+    fn step_timer(&mut self) {
         if (self.tac & 0b100) > 0 {
             self.accumulator += 4;
             let required_clocks = self.required_clocks();
@@ -50,7 +55,7 @@ impl Timer {
                 match timer.checked_add(1) {
                     None => {
                         self.tima = self.tma;
-                        return Option::from(if_register | (1 << Interrupt::Timer.bit_number()));
+                        set_bit!(self.if_register.borrow_mut(), Interrupt::Timer.bit_number());
                     }
                     Some(result) => {
                         self.tima = result;
@@ -58,7 +63,6 @@ impl Timer {
                 }
             }
         }
-        None
     }
 
     fn required_clocks(&self) -> usize {

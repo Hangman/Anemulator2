@@ -5,11 +5,9 @@ use crate::gameboy::memory::memory;
 use crate::gameboy::memory::mmu::Mmu;
 use crate::gameboy::memory::random_access_memory::RandomAccessMemory;
 use crate::gameboy::memory::wram::Wram;
-use crate::gameboy::ppu::Ppu;
 
 pub struct Gameboy {
     cpu: Cpu,
-    ppu: Ppu,
     // apu: Apu,
     game_name: String,
     mmu: Mmu,
@@ -23,6 +21,7 @@ impl Gameboy {
         let mut mmu = Mmu::new(mbc);
 
         // ADD MEMORY UNITS
+        // TODO: REMOVE VRAM & OAM_RAM
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
             "VRAM",
             0x8000,
@@ -33,6 +32,8 @@ impl Gameboy {
             0xFE00,
             0xFEA0 - 0xFE00,
         )));
+        // TODO: REMOVE ABOVE
+
         mmu.add_memory_unit(Box::from(Wram::new()));
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
             "HRAM",
@@ -70,7 +71,6 @@ impl Gameboy {
 
         Self {
             cpu: Cpu::new(),
-            ppu: Ppu::new(),
             game_name,
             mmu,
         }
@@ -80,7 +80,6 @@ impl Gameboy {
         // this.timer.step();
         // this.cpu.step();
         // this.apu.step();
-        self.mmu.step();
-        self.ppu.step(&mut self.mmu)
+        self.mmu.step()
     }
 }
