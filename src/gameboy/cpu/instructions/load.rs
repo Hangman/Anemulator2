@@ -2,7 +2,30 @@ use crate::gameboy::cpu::registers::Registers;
 use crate::gameboy::memory::memory::Memory;
 use crate::gameboy::memory::mmu::Mmu;
 
-pub fn ld_bc_d16(register: &mut Registers, mmu: &mut Mmu) -> isize {
+pub fn ld_c_d8(register: &mut Registers, mmu: &Mmu) -> isize {
+    register.c = mmu.read_byte(register.pc);
+    register.pc += 1;
+
+    8
+}
+
+pub fn ld_a_bc(register: &mut Registers, mmu: &Mmu) -> isize {
+    let address = register.get_bc();
+    register.a = mmu.read_byte(address);
+
+    8
+}
+
+pub fn ld_a16_sp(register: &mut Registers, mmu: &mut Mmu) -> isize {
+    let address = mmu.read_word(register.pc);
+    register.pc += 2;
+    mmu.write_byte(address, register.sp as u8);
+    mmu.write_byte(address + 1, (register.sp >> 8) as u8);
+
+    20
+}
+
+pub fn ld_bc_d16(register: &mut Registers, mmu: &Mmu) -> isize {
     register.set_bc(mmu.read_word(register.pc));
     register.pc += 2;
     12
@@ -244,4 +267,11 @@ pub fn ld_c_h(register: &mut Registers) -> isize {
 pub fn ld_c_l(register: &mut Registers) -> isize {
     register.c = register.l;
     4
+}
+
+pub fn ld_b_d8(register: &mut Registers, mmu: &Mmu) -> isize {
+    register.b = mmu.read_byte(register.pc);
+    register.pc += 1;
+
+    8
 }

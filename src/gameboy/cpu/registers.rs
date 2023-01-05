@@ -86,7 +86,7 @@ impl Registers {
     }
 
     #[inline]
-    pub fn is_flag_set(&self, id: &FlagId) -> bool {
+    pub fn is_flag_set(&self, id: FlagId) -> bool {
         match id {
             FlagId::Z => self.f & (1 << 7) > 0,
             FlagId::N => self.f & (1 << 6) > 0,
@@ -96,7 +96,7 @@ impl Registers {
     }
 
     #[inline]
-    pub fn set_flag(&mut self, id: &FlagId, value: bool) {
+    pub fn set_flag(&mut self, id: FlagId, value: bool) {
         let bit_index = match id {
             FlagId::Z => 7,
             FlagId::N => 6,

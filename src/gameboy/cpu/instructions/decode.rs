@@ -1,4 +1,4 @@
-use crate::gameboy::cpu::instructions::{inc, load};
+use crate::gameboy::cpu::instructions::{add, dec, inc, load, rlc, rrc};
 use crate::gameboy::cpu::registers::Registers;
 use crate::gameboy::memory::mmu::Mmu;
 
@@ -9,17 +9,17 @@ pub fn run_instruction(register: &mut Registers, mmu: &mut Mmu, op_code: u8) -> 
         0x02 => load::ld_bc_a(register, mmu),
         0x03 => inc::inc_bc(register),
         0x04 => inc::inc_b(register),
-        0x05 => todo!(),
-        0x06 => todo!(),
-        0x07 => todo!(),
-        0x08 => todo!(),
-        0x09 => todo!(),
-        0x0A => todo!(),
-        0x0B => todo!(),
-        0x0C => todo!(),
-        0x0D => todo!(),
-        0x0E => todo!(),
-        0x0F => todo!(),
+        0x05 => dec::dec_b(register),
+        0x06 => load::ld_b_d8(register, mmu),
+        0x07 => rlc::rlc_a(register),
+        0x08 => load::ld_a16_sp(register, mmu),
+        0x09 => add::add_hl_bc(register),
+        0x0A => load::ld_a_bc(register, mmu),
+        0x0B => dec::dec_bc(register),
+        0x0C => inc::inc_c(register),
+        0x0D => dec::dec_c(register),
+        0x0E => load::ld_c_d8(register, mmu),
+        0x0F => rrc::rrc_a(register),
 
         0x10 => todo!(),
         0x11 => todo!(),
