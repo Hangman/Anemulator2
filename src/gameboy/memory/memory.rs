@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
 use crate::gameboy::util::bit_util;
-use crate::gameboy::util::bit_util::get_bit;
 
 /// Joypad State register
 /// Bit 7 = unused

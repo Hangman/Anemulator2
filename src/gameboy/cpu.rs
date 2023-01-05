@@ -1,5 +1,6 @@
 use strum::IntoEnumIterator;
 
+use crate::gameboy::cpu::instructions::decode;
 use crate::gameboy::cpu::interrupt::Interrupt;
 use crate::gameboy::cpu::registers::Registers;
 use crate::gameboy::memory::memory;
@@ -43,7 +44,7 @@ impl Cpu {
             let op_code = mmu.read_byte(self.register.pc);
             self.register.pc += 1;
 
-            self.cycle_accumulator -= self.run_instruction(op_code);
+            self.cycle_accumulator -= decode::run_instruction(&mut self.register, mmu, op_code);
         }
     }
 
@@ -86,10 +87,5 @@ impl Cpu {
         }
 
         false
-    }
-
-    fn run_instruction(&mut self, op_code: u8) -> isize {
-        // TODO
-        1
     }
 }

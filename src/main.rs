@@ -101,6 +101,6 @@ fn main() {
 
         // PRINT FRAME TIME
         let duration = start.elapsed();
-        println!("frametime: {:?}", duration);
+        println!("frame-time: {:?}", duration);
     }
 }

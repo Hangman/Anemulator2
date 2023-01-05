@@ -456,8 +456,8 @@ impl Memory for Ppu {
             || address == memory::OBP1
             || address == memory::WX
             || address == memory::WY
-            || (address >= 0x8000 && address < 0xA000)
-            || (address >= 0xFE00 && address < 0xFEA0)
+            || (0x8000..0xA000).contains(&address)
+            || (0xFE00..0xFEA0).contains(&address)
     }
 
     fn read_byte(&self, address: u16) -> u8 {
