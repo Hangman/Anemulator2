@@ -21,19 +21,6 @@ impl Gameboy {
         let mut mmu = Mmu::new(mbc);
 
         // ADD MEMORY UNITS
-        // TODO: REMOVE VRAM & OAM_RAM
-        mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
-            "VRAM",
-            0x8000,
-            0xA000 - 0x8000,
-        )));
-        mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
-            "OAM RAM",
-            0xFE00,
-            0xFEA0 - 0xFE00,
-        )));
-        // TODO: REMOVE ABOVE
-
         mmu.add_memory_unit(Box::from(Wram::new()));
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new(
             "HRAM",
@@ -42,7 +29,6 @@ impl Gameboy {
         )));
         mmu.add_memory_unit(Box::from(InterruptRegisters::new()));
         // TODO ADD JOYPAD
-        // TODO ADD PPU
         // TODO ADD SERIAL BUS
         // TODO ADD APU
         mmu.add_memory_unit(Box::from(RandomAccessMemory::new("KEY1", memory::KEY1, 1)));

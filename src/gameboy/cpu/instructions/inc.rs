@@ -50,3 +50,16 @@ pub fn inc_d(register: &mut Registers) -> isize {
 
     4
 }
+
+pub fn inc_e(register: &mut Registers) -> isize {
+    let old_e = register.e;
+    let new_e = old_e.wrapping_add(1);
+    register.e = new_e;
+
+    // SET FLAGS
+    register.set_flag(FlagId::Z, new_e == 0);
+    register.set_flag(FlagId::N, false);
+    register.set_flag(FlagId::H, (old_e & 0xF) == 0xF);
+
+    4
+}

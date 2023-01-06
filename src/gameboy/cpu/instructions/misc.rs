@@ -18,3 +18,18 @@ pub fn rla(register: &mut Registers) -> isize {
 
     8
 }
+
+pub fn rra(register: &mut Registers) -> isize {
+    let lsb = register.a & 0b1;
+    let carry_bit = register.is_flag_set(FlagId::C) as u8;
+    let a = (register.a >> 1) | (carry_bit << 7);
+    register.a = a;
+
+    // SET FLAGS
+    register.set_flag(FlagId::Z, false);
+    register.set_flag(FlagId::H, false);
+    register.set_flag(FlagId::N, false);
+    register.set_flag(FlagId::C, lsb != 0);
+
+    8
+}

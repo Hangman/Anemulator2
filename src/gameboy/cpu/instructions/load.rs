@@ -2,6 +2,18 @@ use crate::gameboy::cpu::registers::Registers;
 use crate::gameboy::memory::memory::Memory;
 use crate::gameboy::memory::mmu::Mmu;
 
+pub fn ld_e_d8(register: &mut Registers, mmu: &Mmu) -> isize {
+    register.e = mmu.read_byte(register.pc);
+    register.pc += 1;
+    8
+}
+
+pub fn ld_a_de(register: &mut Registers, mmu: &Mmu) -> isize {
+    let address = register.get_de();
+    register.a = mmu.read_byte(address);
+    8
+}
+
 pub fn ld_d_d8(register: &mut Registers, mmu: &Mmu) -> isize {
     register.d = mmu.read_byte(register.pc);
     register.pc += 1;
