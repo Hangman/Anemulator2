@@ -24,6 +24,18 @@ pub fn dec_c(register: &mut Registers) -> isize {
     4
 }
 
+pub fn dec_d(register: &mut Registers) -> isize {
+    let old_d = register.d;
+    register.d = old_d.wrapping_sub(1);
+
+    // SET FLAGS
+    register.set_flag(FlagId::Z, register.d == 0);
+    register.set_flag(FlagId::N, true);
+    register.set_flag(FlagId::H, old_d.trailing_zeros() >= 4);
+
+    4
+}
+
 pub fn dec_bc(register: &mut Registers) -> isize {
     register.set_bc(register.get_bc().wrapping_sub(1));
 
