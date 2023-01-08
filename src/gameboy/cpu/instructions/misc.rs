@@ -33,3 +33,53 @@ pub fn rra(register: &mut Registers) -> isize {
 
     8
 }
+
+pub fn da_a(register: &mut Registers) -> isize {
+    if register.is_flag_set(FlagId::N) {
+        if register.is_flag_set(FlagId::C) {
+            register.a = register.a.wrapping_add(0xA0);
+            register.set_flag(FlagId::C, true);
+        }
+        if register.is_flag_set(FlagId::H) {
+            register.a = register.a.wrapping_add(0xFA);
+        }
+    } else {
+        if register.is_flag_set(FlagId::C) || (register.a > 0x99) {
+            register.a = register.a.wrapping_add(0x60);
+            register.set_flag(FlagId::C, true);
+        }
+        if register.is_flag_set(FlagId::H) || ((register.a & 0xF) > 0x9) {
+            register.a = register.a.wrapping_add(0x06);
+        }
+    }
+
+    // SET FLAGS
+    register.set_flag(FlagId::Z, register.a == 0);
+    register.set_flag(FlagId::H, false);
+
+    4
+}
+
+pub fn cpl_a(register: &mut Registers) -> isize {
+    register.a = !register.a;
+
+    // SET FLAGS
+    register.set_flag(FlagId::N, true);
+    register.set_flag(FlagId::H, true);
+
+    4
+}
+
+pub fn scf(register: &mut Registers) -> isize {
+    register.set_flag(FlagId::N, false);
+    register.set_flag(FlagId::H, false);
+    register.set_flag(FlagId::C, true);
+    4
+}
+
+pub fn ccf(register: &mut Registers) -> isize {
+    register.set_flag(FlagId::N, false);
+    register.set_flag(FlagId::H, false);
+    register.set_flag(FlagId::C, !register.is_flag_set(FlagId::C));
+    4
+}

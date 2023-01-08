@@ -27,3 +27,30 @@ pub fn add_hl_de(register: &mut Registers) -> isize {
 
     8
 }
+
+pub fn add_hl_hl(register: &mut Registers) -> isize {
+    let hl = register.get_hl();
+    let result = hl.wrapping_add(hl);
+    register.set_hl(result);
+
+    // SET FLAGS
+    register.set_flag(FlagId::N, false);
+    register.set_flag(FlagId::H, (hl & 0xFFF) + (hl & 0xFFF) > 0xFFF);
+    register.set_flag(FlagId::C, (hl as u32) + (hl as u32) > 0xFFFF);
+
+    8
+}
+
+pub fn add_hl_sp(register: &mut Registers) -> isize {
+    let sp = register.sp;
+    let hl = register.get_hl();
+    let result = hl.wrapping_add(sp);
+    register.set_hl(result);
+
+    // SET FLAGS
+    register.set_flag(FlagId::N, false);
+    register.set_flag(FlagId::H, (hl & 0xFFF) + (sp & 0xFFF) > 0xFFF);
+    register.set_flag(FlagId::C, (sp as u32) + (hl as u32) > 0xFFFF);
+
+    8
+}

@@ -2,6 +2,72 @@ use crate::gameboy::cpu::registers::Registers;
 use crate::gameboy::memory::memory::Memory;
 use crate::gameboy::memory::mmu::Mmu;
 
+pub fn ld_a_d8(register: &mut Registers, mmu: &Mmu) -> isize {
+    register.a = mmu.read_byte(register.pc);
+    register.pc += 1;
+    8
+}
+
+pub fn ld_a_hlminus(register: &mut Registers, mmu: &Mmu) -> isize {
+    let address = register.get_hl();
+    register.a = mmu.read_byte(address);
+    register.set_hl(address.wrapping_sub(1));
+    8
+}
+
+pub fn ld_hl_d8(register: &mut Registers, mmu: &mut Mmu) -> isize {
+    let address = register.get_hl();
+    let value = mmu.read_byte(register.pc);
+    register.pc += 1;
+    mmu.write_byte(address, value);
+    12
+}
+
+pub fn ld_hlminus_a(register: &mut Registers, mmu: &mut Mmu) -> isize {
+    let address = register.get_hl();
+    mmu.write_byte(address, register.a);
+    register.set_hl(address.wrapping_sub(1));
+    8
+}
+
+pub fn ld_sp_d16(register: &mut Registers, mmu: &Mmu) -> isize {
+    register.sp = mmu.read_word(register.pc);
+    register.pc += 2;
+    12
+}
+
+pub fn ld_l_d8(register: &mut Registers, mmu: &Mmu) -> isize {
+    register.l = mmu.read_byte(register.pc);
+    register.pc += 1;
+    8
+}
+
+pub fn ld_a_hplus(register: &mut Registers, mmu: &Mmu) -> isize {
+    let address = register.get_hl();
+    register.a = mmu.read_byte(address);
+    register.set_hl(address.wrapping_add(1));
+    8
+}
+
+pub fn ld_h_d8(register: &mut Registers, mmu: &Mmu) -> isize {
+    register.h = mmu.read_byte(register.pc);
+    register.pc += 1;
+    8
+}
+
+pub fn ld_hlplus_a(register: &mut Registers, mmu: &mut Mmu) -> isize {
+    let address = register.get_hl();
+    mmu.write_byte(address, register.a);
+    register.set_hl(address.wrapping_add(1));
+    8
+}
+
+pub fn ld_hl_d16(register: &mut Registers, mmu: &Mmu) -> isize {
+    register.set_hl(mmu.read_word(register.pc));
+    register.pc += 2;
+    12
+}
+
 pub fn ld_e_d8(register: &mut Registers, mmu: &Mmu) -> isize {
     register.e = mmu.read_byte(register.pc);
     register.pc += 1;
