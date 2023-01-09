@@ -44,7 +44,7 @@ impl Cpu {
             let op_code = mmu.read_byte(self.register.pc);
             self.register.pc += 1;
 
-            self.cycle_accumulator -= decode::run_instruction(&mut self.register, mmu, op_code);
+            self.cycle_accumulator -= self.run_instruction(mmu, op_code);
         }
     }
 
@@ -87,5 +87,9 @@ impl Cpu {
         }
 
         false
+    }
+
+    pub fn halt(&mut self) {
+        self.halted = true;
     }
 }
