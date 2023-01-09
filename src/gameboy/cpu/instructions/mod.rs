@@ -1,10 +1,14 @@
 mod add;
+mod and;
 mod dec;
 pub mod decode;
 mod inc;
 mod jump;
 mod load;
 mod misc;
+mod or;
 mod rlc;
 mod rrc;
 mod sub;
+mod xor;
+mod compare;
