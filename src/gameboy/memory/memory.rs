@@ -211,8 +211,7 @@ pub trait Memory: Display {
     fn read_byte(&self, address: u16) -> u8;
 
     fn read_word(&self, address: u16) -> u16 {
-        let second_byte_address = address + 1;
-        (self.read_byte(address) as u16) | ((self.read_byte(second_byte_address) as u16) << 8)
+        (self.read_byte(address) as u16) | ((self.read_byte(address + 1) as u16) << 8)
     }
 
     fn write_byte(&mut self, address: u16, value: u8);

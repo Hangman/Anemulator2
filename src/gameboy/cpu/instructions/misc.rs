@@ -1,5 +1,7 @@
 use crate::gameboy::cpu::registers::FlagId;
 use crate::gameboy::cpu::Cpu;
+use crate::gameboy::memory::memory::Memory;
+use crate::gameboy::memory::mmu::Mmu;
 
 impl Cpu {
     pub fn stop(&mut self) -> isize {
@@ -85,5 +87,37 @@ impl Cpu {
         self.register
             .set_flag(FlagId::C, !self.register.is_flag_set(FlagId::C));
         4
+    }
+
+    pub fn ret_nz(&mut self, mmu: &Mmu) -> isize {
+        if !self.register.is_flag_set(FlagId::Z) {
+            let return_address = mmu.read_word(self.register.sp);
+            self.register.sp += 2;
+            self.register.pc = return_address;
+            return 20;
+        }
+        8
+    }
+
+    pub fn pop_bc(&mut self, mmu: &Mmu) -> isize {
+        let data = mmu.read_word(self.register.sp);
+        self.register.sp += 2;
+        self.register.set_bc(data);
+        12
+    }
+
+    pub fn call_nz_a16(&mut self, mmu: &mut Mmu) -> isize {
+        let address = mmu.read_word(self.register.pc);
+        self.register.pc += 2;
+        if !self.register.is_flag_set(FlagId::Z) {
+            self.register.sp -= 1;
+            mmu.write_byte(self.register.sp, ((self.register.pc & 0xFF00) >> 8) as u8);
+            self.register.sp -= 1;
+            mmu.write_byte(self.register.sp, self.register.pc as u8);
+            self.register.pc = address;
+            return 16;
+        }
+
+        12
     }
 }
