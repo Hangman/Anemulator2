@@ -1,5 +1,6 @@
 mod add;
 mod and;
+mod compare;
 mod dec;
 pub mod decode;
 mod inc;
@@ -7,8 +8,8 @@ mod jump;
 mod load;
 mod misc;
 mod or;
+mod reset;
 mod rlc;
 mod rrc;
 mod sub;
 mod xor;
-mod compare;

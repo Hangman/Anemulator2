@@ -73,4 +73,14 @@ impl Cpu {
         self.register.pc = mmu.read_word(self.register.pc);
         16
     }
+
+    pub fn jp_z_a16(&mut self, mmu: &Mmu) -> isize {
+        if self.register.is_flag_set(FlagId::Z) {
+            self.register.pc = mmu.read_word(self.register.pc);
+            return 16;
+        }
+
+        self.register.pc += 2;
+        12
+    }
 }

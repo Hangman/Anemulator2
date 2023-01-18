@@ -91,9 +91,8 @@ impl Cpu {
 
     pub fn ret_nz(&mut self, mmu: &Mmu) -> isize {
         if !self.register.is_flag_set(FlagId::Z) {
-            let return_address = mmu.read_word(self.register.sp);
+            self.register.pc = mmu.read_word(self.register.sp);
             self.register.sp += 2;
-            self.register.pc = return_address;
             return 20;
         }
         8
@@ -103,6 +102,21 @@ impl Cpu {
         let data = mmu.read_word(self.register.sp);
         self.register.sp += 2;
         self.register.set_bc(data);
+        12
+    }
+
+    pub fn call_z_a16(&mut self, mmu: &mut Mmu) -> isize {
+        let address = mmu.read_word(self.register.pc);
+        self.register.pc += 2;
+        if self.register.is_flag_set(FlagId::Z) {
+            self.register.sp -= 1;
+            mmu.write_byte(self.register.sp, ((self.register.pc & 0xFF00) >> 8) as u8);
+            self.register.sp -= 1;
+            mmu.write_byte(self.register.sp, self.register.pc as u8);
+            self.register.pc = address;
+            return 16;
+        }
+
         12
     }
 
@@ -119,5 +133,42 @@ impl Cpu {
         }
 
         12
+    }
+
+    pub fn push_bc(&mut self, mmu: &mut Mmu) -> isize {
+        let bc = self.register.get_bc();
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, (bc >> 8) as u8);
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, bc as u8);
+        16
+    }
+
+    pub fn ret_z(&mut self, mmu: &Mmu) -> isize {
+        if self.register.is_flag_set(FlagId::Z) {
+            self.register.pc = mmu.read_word(self.register.sp);
+            self.register.sp += 2;
+            return 20;
+        }
+
+        8
+    }
+
+    pub fn ret(&mut self, mmu: &Mmu) -> isize {
+        self.register.pc = mmu.read_word(self.register.sp);
+        self.register.sp += 2;
+        16
+    }
+
+    pub fn call_a16(&mut self, mmu: &mut Mmu) -> isize {
+        let address = mmu.read_word(self.register.pc);
+        self.register.pc += 2;
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, (self.register.pc >> 8) as u8);
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, self.register.pc as u8);
+        self.register.pc = address;
+
+        24
     }
 }

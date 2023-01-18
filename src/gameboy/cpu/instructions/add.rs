@@ -68,298 +68,313 @@ impl Cpu {
     }
 
     pub fn add_a_b(&mut self) -> isize {
-        let old_b = self.register.b;
         let old_a = self.register.a;
-        let result = old_b.wrapping_add(old_a);
-        self.register.a = result;
+        self.register.a = old_a.wrapping_add(self.register.b);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (old_a & 0xF) + (old_b & 0xF) > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (self.register.b & 0xF) > 0xF);
         self.register
-            .set_flag(FlagId::C, (old_a as u16 + old_b as u16) > 0xFF);
+            .set_flag(FlagId::C, (old_a as u16 + self.register.b as u16) > 0xFF);
 
         4
     }
 
     pub fn add_a_c(&mut self) -> isize {
-        let old_c = self.register.c;
         let old_a = self.register.a;
-        let result = old_c.wrapping_add(old_a);
-        self.register.a = result;
+        self.register.a = old_a.wrapping_add(self.register.c);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (old_a & 0xF) + (old_c & 0xF) > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (self.register.c & 0xF) > 0xF);
         self.register
-            .set_flag(FlagId::C, (old_a as u16 + old_c as u16) > 0xFF);
+            .set_flag(FlagId::C, (old_a as u16 + self.register.c as u16) > 0xFF);
 
         4
     }
 
     pub fn add_a_d(&mut self) -> isize {
-        let old_d = self.register.d;
         let old_a = self.register.a;
-        let result = old_d.wrapping_add(old_a);
-        self.register.a = result;
+        self.register.a = old_a.wrapping_add(self.register.d);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (old_a & 0xF) + (old_d & 0xF) > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (self.register.d & 0xF) > 0xF);
         self.register
-            .set_flag(FlagId::C, (old_a as u16 + old_d as u16) > 0xFF);
+            .set_flag(FlagId::C, (old_a as u16 + self.register.d as u16) > 0xFF);
 
         4
     }
 
     pub fn add_a_e(&mut self) -> isize {
-        let old_e = self.register.e;
         let old_a = self.register.a;
-        let result = old_e.wrapping_add(old_a);
-        self.register.a = result;
+        self.register.a = old_a.wrapping_add(self.register.e);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (old_a & 0xF) + (old_e & 0xF) > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (self.register.e & 0xF) > 0xF);
         self.register
-            .set_flag(FlagId::C, (old_a as u16 + old_e as u16) > 0xFF);
+            .set_flag(FlagId::C, (old_a as u16 + self.register.e as u16) > 0xFF);
 
         4
     }
 
     pub fn add_a_h(&mut self) -> isize {
-        let old_h = self.register.h;
         let old_a = self.register.a;
-        let result = old_h.wrapping_add(old_a);
-        self.register.a = result;
+        self.register.a = old_a.wrapping_add(self.register.h);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (old_a & 0xF) + (old_h & 0xF) > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (self.register.h & 0xF) > 0xF);
         self.register
-            .set_flag(FlagId::C, (old_a as u16 + old_h as u16) > 0xFF);
+            .set_flag(FlagId::C, (old_a as u16 + self.register.h as u16) > 0xFF);
 
         4
     }
 
     pub fn add_a_l(&mut self) -> isize {
-        let old_l = self.register.l;
         let old_a = self.register.a;
-        let result = old_l.wrapping_add(old_a);
-        self.register.a = result;
+        self.register.a = old_a.wrapping_add(self.register.l);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (old_a & 0xF) + (old_l & 0xF) > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (self.register.l & 0xF) > 0xF);
         self.register
-            .set_flag(FlagId::C, (old_a as u16 + old_l as u16) > 0xFF);
+            .set_flag(FlagId::C, (old_a as u16 + self.register.l as u16) > 0xFF);
 
         4
     }
 
     pub fn add_a_hl(&mut self, mmu: &Mmu) -> isize {
         let value = mmu.read_byte(self.register.get_hl());
-        let a = self.register.a;
-        let result = value.wrapping_add(a);
-        self.register.a = result;
+        let old_a = self.register.a;
+        self.register.a = value.wrapping_add(old_a);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) > 0xF);
         self.register
-            .set_flag(FlagId::C, (a as u16 + value as u16) > 0xFF);
+            .set_flag(FlagId::C, (old_a as u16 + value as u16) > 0xFF);
 
         8
     }
 
     pub fn add_a_a(&mut self) -> isize {
         let value = self.register.a;
-        let a = self.register.a;
-        let result = value.wrapping_add(a);
-        self.register.a = result;
+        let old_a = self.register.a;
+        self.register.a = value.wrapping_add(old_a);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) > 0xF);
         self.register
-            .set_flag(FlagId::C, (a as u16 + value as u16) > 0xFF);
+            .set_flag(FlagId::C, (old_a as u16 + value as u16) > 0xFF);
 
         4
     }
 
     pub fn adc_a_a(&mut self) -> isize {
-        let a = self.register.a;
+        let old_a = self.register.a;
         let value = self.register.a;
         let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
-        let result = value.wrapping_add(a).wrapping_add(carry_bit);
-        self.register.a = result;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
         self.register.set_flag(
             FlagId::C,
-            (value as u16) + (a as u16) + (carry_bit as u16) > 0xFF,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
         );
 
         4
     }
 
     pub fn adc_a_b(&mut self) -> isize {
-        let a = self.register.a;
+        let old_a = self.register.a;
         let value = self.register.b;
         let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
-        let result = value.wrapping_add(a).wrapping_add(carry_bit);
-        self.register.a = result;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
         self.register.set_flag(
             FlagId::C,
-            (value as u16) + (a as u16) + (carry_bit as u16) > 0xFF,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
         );
 
         4
     }
 
     pub fn adc_a_c(&mut self) -> isize {
-        let a = self.register.a;
+        let old_a = self.register.a;
         let value = self.register.c;
         let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
-        let result = value.wrapping_add(a).wrapping_add(carry_bit);
-        self.register.a = result;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
         self.register.set_flag(
             FlagId::C,
-            (value as u16) + (a as u16) + (carry_bit as u16) > 0xFF,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
         );
 
         4
     }
 
     pub fn adc_a_d(&mut self) -> isize {
-        let a = self.register.a;
+        let old_a = self.register.a;
         let value = self.register.d;
         let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
-        let result = value.wrapping_add(a).wrapping_add(carry_bit);
-        self.register.a = result;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
         self.register.set_flag(
             FlagId::C,
-            (value as u16) + (a as u16) + (carry_bit as u16) > 0xFF,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
         );
 
         4
     }
 
     pub fn adc_a_e(&mut self) -> isize {
-        let a = self.register.a;
+        let old_a = self.register.a;
         let value = self.register.e;
         let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
-        let result = value.wrapping_add(a).wrapping_add(carry_bit);
-        self.register.a = result;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
         self.register.set_flag(
             FlagId::C,
-            (value as u16) + (a as u16) + (carry_bit as u16) > 0xFF,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
         );
 
         4
     }
 
     pub fn adc_a_h(&mut self) -> isize {
-        let a = self.register.a;
+        let old_a = self.register.a;
         let value = self.register.h;
         let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
-        let result = value.wrapping_add(a).wrapping_add(carry_bit);
-        self.register.a = result;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
         self.register.set_flag(
             FlagId::C,
-            (value as u16) + (a as u16) + (carry_bit as u16) > 0xFF,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
         );
 
         4
     }
 
     pub fn adc_a_l(&mut self) -> isize {
-        let a = self.register.a;
+        let old_a = self.register.a;
         let value = self.register.l;
         let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
-        let result = value.wrapping_add(a).wrapping_add(carry_bit);
-        self.register.a = result;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
         self.register.set_flag(
             FlagId::C,
-            (value as u16) + (a as u16) + (carry_bit as u16) > 0xFF,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
         );
 
         4
     }
 
-    pub fn adc_a_hl(&mut self, mmu: &Mmu) -> isize {
-        let a = self.register.a;
-        let value = mmu.read_byte(self.register.get_hl());
+    pub fn adc_a_d8(&mut self, mmu: &Mmu) -> isize {
+        let old_a = self.register.a;
+        let value = mmu.read_byte(self.register.pc);
+        self.register.pc += 1;
         let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
-        let result = value.wrapping_add(a).wrapping_add(carry_bit);
-        self.register.a = result;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
 
         // SET FLAGS
-        self.register.set_flag(FlagId::Z, result == 0);
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
         self.register.set_flag(FlagId::N, false);
         self.register
-            .set_flag(FlagId::H, (a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
         self.register.set_flag(
             FlagId::C,
-            (value as u16) + (a as u16) + (carry_bit as u16) > 0xFF,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
+        );
+
+        8
+    }
+
+    pub fn adc_a_hl(&mut self, mmu: &Mmu) -> isize {
+        let old_a = self.register.a;
+        let value = mmu.read_byte(self.register.get_hl());
+        let carry_bit = self.register.is_flag_set(FlagId::C) as u8;
+        self.register.a = value.wrapping_add(old_a).wrapping_add(carry_bit);
+
+        // SET FLAGS
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
+        self.register.set_flag(FlagId::N, false);
+        self.register
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) + carry_bit > 0xF);
+        self.register.set_flag(
+            FlagId::C,
+            (value as u16) + (old_a as u16) + (carry_bit as u16) > 0xFF,
         );
 
         4
+    }
+
+    pub fn add_a_d8(&mut self, mmu: &Mmu) -> isize {
+        let value = mmu.read_byte(self.register.pc);
+        self.register.pc += 1;
+        let old_a = self.register.a;
+        self.register.a = self.register.a.wrapping_add(value);
+
+        // SET FLAGS
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
+        self.register.set_flag(FlagId::N, false);
+        self.register
+            .set_flag(FlagId::H, (old_a & 0xF) + (value & 0xF) > 0xF);
+        self.register
+            .set_flag(FlagId::C, (old_a as u16 + value as u16) > 0xFF);
+
+        8
     }
 }
