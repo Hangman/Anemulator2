@@ -105,6 +105,13 @@ impl Cpu {
         12
     }
 
+    pub fn pop_de(&mut self, mmu: &Mmu) -> isize {
+        let data = mmu.read_word(self.register.sp);
+        self.register.sp += 2;
+        self.register.set_de(data);
+        12
+    }
+
     pub fn call_z_a16(&mut self, mmu: &mut Mmu) -> isize {
         let address = mmu.read_word(self.register.pc);
         self.register.pc += 2;
@@ -135,6 +142,36 @@ impl Cpu {
         12
     }
 
+    pub fn call_nc_a16(&mut self, mmu: &mut Mmu) -> isize {
+        let address = mmu.read_word(self.register.pc);
+        self.register.pc += 2;
+        if !self.register.is_flag_set(FlagId::C) {
+            self.register.sp -= 1;
+            mmu.write_byte(self.register.sp, ((self.register.pc & 0xFF00) >> 8) as u8);
+            self.register.sp -= 1;
+            mmu.write_byte(self.register.sp, self.register.pc as u8);
+            self.register.pc = address;
+            return 16;
+        }
+
+        12
+    }
+
+    pub fn call_c_a16(&mut self, mmu: &mut Mmu) -> isize {
+        let address = mmu.read_word(self.register.pc);
+        self.register.pc += 2;
+        if self.register.is_flag_set(FlagId::C) {
+            self.register.sp -= 1;
+            mmu.write_byte(self.register.sp, ((self.register.pc & 0xFF00) >> 8) as u8);
+            self.register.sp -= 1;
+            mmu.write_byte(self.register.sp, self.register.pc as u8);
+            self.register.pc = address;
+            return 16;
+        }
+
+        12
+    }
+
     pub fn push_bc(&mut self, mmu: &mut Mmu) -> isize {
         let bc = self.register.get_bc();
         self.register.sp -= 1;
@@ -144,8 +181,44 @@ impl Cpu {
         16
     }
 
+    pub fn push_de(&mut self, mmu: &mut Mmu) -> isize {
+        let de = self.register.get_de();
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, (de >> 8) as u8);
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, de as u8);
+        16
+    }
+
     pub fn ret_z(&mut self, mmu: &Mmu) -> isize {
         if self.register.is_flag_set(FlagId::Z) {
+            self.register.pc = mmu.read_word(self.register.sp);
+            self.register.sp += 2;
+            return 20;
+        }
+
+        8
+    }
+
+    pub fn ret_c(&mut self, mmu: &Mmu) -> isize {
+        if self.register.is_flag_set(FlagId::C) {
+            self.register.pc = mmu.read_word(self.register.sp);
+            self.register.sp += 2;
+            return 20;
+        }
+
+        8
+    }
+
+    pub fn ret_i(&mut self, mmu: &Mmu) -> isize {
+        self.register.pc = mmu.read_word(self.register.sp);
+        self.register.sp += 2;
+        self.register.set_interrupts_enabled(true, true);
+        16
+    }
+
+    pub fn ret_nc(&mut self, mmu: &Mmu) -> isize {
+        if !self.register.is_flag_set(FlagId::C) {
             self.register.pc = mmu.read_word(self.register.sp);
             self.register.sp += 2;
             return 20;

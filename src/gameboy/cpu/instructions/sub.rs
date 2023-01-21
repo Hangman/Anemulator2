@@ -4,6 +4,22 @@ use crate::gameboy::memory::memory::Memory;
 use crate::gameboy::memory::mmu::Mmu;
 
 impl Cpu {
+    pub fn sub_d8(&mut self, mmu: &Mmu) -> isize {
+        let value = mmu.read_byte(self.register.pc);
+        self.register.pc += 1;
+        let old_a = self.register.a;
+        self.register.a = old_a.wrapping_sub(value);
+
+        // SET FLAGS
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
+        self.register.set_flag(FlagId::N, true);
+        self.register
+            .set_flag(FlagId::H, (old_a & 0xF) < (value & 0xF));
+        self.register.set_flag(FlagId::C, old_a < value);
+
+        8
+    }
+
     pub fn sub_a(&mut self) -> isize {
         self.register.a = 0;
 
@@ -246,5 +262,22 @@ impl Cpu {
         self.register.set_flag(FlagId::C, old_a < value + carry);
 
         4
+    }
+
+    pub fn sbc_a_d8(&mut self, mmu: &Mmu) -> isize {
+        let old_a = self.register.a;
+        let carry = self.register.is_flag_set(FlagId::C) as u8;
+        let value = mmu.read_byte(self.register.pc);
+        self.register.pc += 1;
+        self.register.a = old_a.wrapping_sub(value).wrapping_sub(carry);
+
+        // SET FLAGS
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
+        self.register.set_flag(FlagId::N, true);
+        self.register
+            .set_flag(FlagId::H, (old_a & 0xF) < (value & 0xF) + carry);
+        self.register.set_flag(FlagId::C, old_a < value + carry);
+
+        8
     }
 }

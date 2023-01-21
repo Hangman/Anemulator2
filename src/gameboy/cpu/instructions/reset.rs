@@ -18,7 +18,24 @@ impl Cpu {
         self.register.sp -= 1;
         mmu.write_byte(self.register.sp, self.register.pc as u8);
         self.register.pc = 0x08;
+        16
+    }
 
+    pub fn rst_10h(&mut self, mmu: &mut Mmu) -> isize {
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, (self.register.pc >> 8) as u8);
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, self.register.pc as u8);
+        self.register.pc = 0x10;
+        16
+    }
+
+    pub fn rst_18h(&mut self, mmu: &mut Mmu) -> isize {
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, (self.register.pc >> 8) as u8);
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, self.register.pc as u8);
+        self.register.pc = 0x18;
         16
     }
 }
