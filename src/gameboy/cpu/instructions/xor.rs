@@ -99,4 +99,17 @@ impl Cpu {
 
         4
     }
+
+    pub fn xor_d8(&mut self, mmu: &Mmu) -> isize {
+        self.register.a ^= mmu.read_byte(self.register.pc);
+        self.register.pc += 1;
+
+        // SET FLAGS
+        self.register.set_flag(FlagId::Z, self.register.a == 0);
+        self.register.set_flag(FlagId::N, false);
+        self.register.set_flag(FlagId::H, false);
+        self.register.set_flag(FlagId::C, false);
+
+        8
+    }
 }

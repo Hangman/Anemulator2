@@ -1,3 +1,5 @@
+use std::mem;
+
 use crate::gameboy::cpu::registers::FlagId;
 use crate::gameboy::cpu::Cpu;
 use crate::gameboy::memory::memory::Memory;
@@ -376,5 +378,25 @@ impl Cpu {
             .set_flag(FlagId::C, (old_a as u16 + value as u16) > 0xFF);
 
         8
+    }
+
+    pub fn add_sp_r8(&mut self, mmu: &Mmu) -> isize {
+        let offset = unsafe { mem::transmute::<u8, i8>(mmu.read_byte(self.register.pc)) };
+        self.register.pc += 1;
+        let old_sp = self.register.sp;
+        let new_sp = (old_sp as i16).wrapping_add(offset as i16) as u16;
+        self.register.sp = new_sp;
+
+        // SET FLAGS
+        self.register.set_flag(FlagId::Z, false);
+        self.register.set_flag(FlagId::N, false);
+        self.register.set_flag(
+            FlagId::H,
+            (old_sp as i16 & 0xF) + (offset as i16 & 0xF) > 0xF,
+        );
+        self.register
+            .set_flag(FlagId::C, old_sp as i32 + offset as i32 > 0xFF);
+
+        16
     }
 }

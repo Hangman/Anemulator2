@@ -78,6 +78,13 @@ impl Cpu {
         8
     }
 
+    pub fn ldh_a8_a(&mut self, mmu: &mut Mmu) -> isize {
+        let address = 0xFF00 + mmu.read_byte(self.register.pc) as u16;
+        self.register.pc += 1;
+        mmu.write_byte(address, self.register.a);
+        12
+    }
+
     pub fn ld_a_d8(&mut self, mmu: &Mmu) -> isize {
         self.register.a = mmu.read_byte(self.register.pc);
         self.register.pc += 1;
@@ -395,6 +402,19 @@ impl Cpu {
     pub fn ld_c_a(&mut self) -> isize {
         self.register.c = self.register.a;
         4
+    }
+
+    pub fn ld__c__a(&mut self, mmu: &mut Mmu) -> isize {
+        let address = 0xFF00 + self.register.c as u16;
+        mmu.write_byte(address, self.register.a);
+        8
+    }
+
+    pub fn ld_a16_a(&mut self, mmu: &mut Mmu) -> isize {
+        let address = mmu.read_word(self.register.pc);
+        self.register.pc += 2;
+        mmu.write_byte(address, self.register.a);
+        16
     }
 
     pub fn ld_c_b(&mut self) -> isize {

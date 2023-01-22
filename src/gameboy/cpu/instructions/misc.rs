@@ -112,6 +112,13 @@ impl Cpu {
         12
     }
 
+    pub fn pop_hl(&mut self, mmu: &Mmu) -> isize {
+        let data = mmu.read_word(self.register.sp);
+        self.register.sp += 2;
+        self.register.set_hl(data);
+        12
+    }
+
     pub fn call_z_a16(&mut self, mmu: &mut Mmu) -> isize {
         let address = mmu.read_word(self.register.pc);
         self.register.pc += 2;
@@ -187,6 +194,15 @@ impl Cpu {
         mmu.write_byte(self.register.sp, (de >> 8) as u8);
         self.register.sp -= 1;
         mmu.write_byte(self.register.sp, de as u8);
+        16
+    }
+
+    pub fn push_hl(&mut self, mmu: &mut Mmu) -> isize {
+        let hl = self.register.get_hl();
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, (hl >> 8) as u8);
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, hl as u8);
         16
     }
 

@@ -103,4 +103,9 @@ impl Cpu {
         self.register.pc += 2;
         12
     }
+
+    pub fn jp_hl(&mut self) -> isize {
+        self.register.pc = self.register.get_hl();
+        4
+    }
 }
