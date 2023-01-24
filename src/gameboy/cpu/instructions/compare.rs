@@ -81,4 +81,15 @@ impl Cpu {
         self.register.set_flag(FlagId::C, self.register.a < value);
         4
     }
+
+    pub fn cp_d8(&mut self, mmu: &Mmu) -> isize {
+        let value = mmu.read_byte(self.register.pc);
+        self.register.pc += 1;
+        self.register.set_flag(FlagId::Z, self.register.a == value);
+        self.register.set_flag(FlagId::N, true);
+        self.register
+            .set_flag(FlagId::H, (self.register.a & 0xF) < (value & 0xF));
+        self.register.set_flag(FlagId::C, self.register.a < value);
+        8
+    }
 }

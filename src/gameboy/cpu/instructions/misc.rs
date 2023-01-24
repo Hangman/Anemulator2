@@ -98,6 +98,13 @@ impl Cpu {
         8
     }
 
+    pub fn pop_af(&mut self, mmu: &Mmu) -> isize {
+        let data = mmu.read_word(self.register.sp);
+        self.register.sp += 2;
+        self.register.set_af(data);
+        12
+    }
+
     pub fn pop_bc(&mut self, mmu: &Mmu) -> isize {
         let data = mmu.read_word(self.register.sp);
         self.register.sp += 2;
@@ -188,6 +195,15 @@ impl Cpu {
         16
     }
 
+    pub fn push_af(&mut self, mmu: &mut Mmu) -> isize {
+        let af = self.register.get_af();
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, (af >> 8) as u8);
+        self.register.sp -= 1;
+        mmu.write_byte(self.register.sp, af as u8);
+        16
+    }
+
     pub fn push_de(&mut self, mmu: &mut Mmu) -> isize {
         let de = self.register.get_de();
         self.register.sp -= 1;
@@ -259,5 +275,15 @@ impl Cpu {
         self.register.pc = address;
 
         24
+    }
+
+    pub fn di(&mut self) -> isize {
+        self.register.set_interrupts_enabled(false, false);
+        4
+    }
+
+    pub fn ei(&mut self) -> isize {
+        self.register.set_interrupts_enabled(true, false);
+        4
     }
 }

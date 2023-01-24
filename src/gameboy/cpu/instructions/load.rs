@@ -1,3 +1,6 @@
+use std::mem;
+
+use crate::gameboy::cpu::registers::FlagId;
 use crate::gameboy::cpu::Cpu;
 use crate::gameboy::memory::memory::Memory;
 use crate::gameboy::memory::mmu::Mmu;
@@ -450,5 +453,48 @@ impl Cpu {
         self.register.b = mmu.read_byte(self.register.pc);
         self.register.pc += 1;
         8
+    }
+
+    pub fn ldh_a_a8(&mut self, mmu: &Mmu) -> isize {
+        let offset = mmu.read_byte(self.register.pc) as u16;
+        self.register.pc += 1;
+        self.register.a = mmu.read_byte(0xFF00 + offset);
+        12
+    }
+
+    pub fn ld_a_c_(&mut self, mmu: &Mmu) -> isize {
+        let address = 0xFF00 + self.register.c as u16;
+        self.register.a = mmu.read_byte(address);
+        8
+    }
+
+    pub fn ld_hl_spplus_r8(&mut self, mmu: &Mmu) -> isize {
+        let offset = mmu.read_byte(self.register.pc) as i8 as i16 as u16;
+        self.register.pc += 1;
+        self.register.set_hl(self.register.sp.wrapping_add(offset));
+
+        // SET FLAGS
+        self.register.set_flag(FlagId::Z, false);
+        self.register.set_flag(FlagId::N, false);
+        self.register
+            .set_flag(FlagId::H, (self.register.sp & 0xF) + (offset & 0xF) > 0xF);
+        self.register.set_flag(
+            FlagId::C,
+            (self.register.sp & 0xFF) + (offset & 0xFF) > 0xFF,
+        );
+
+        12
+    }
+
+    pub fn ld_sp_hl(&mut self) -> isize {
+        self.register.sp = self.register.get_hl();
+        8
+    }
+
+    pub fn ld_a_a16(&mut self, mmu: &Mmu) -> isize {
+        let address = mmu.read_word(self.register.pc);
+        self.register.pc += 2;
+        self.register.a = mmu.read_byte(address);
+        16
     }
 }

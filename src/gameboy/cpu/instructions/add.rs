@@ -381,10 +381,10 @@ impl Cpu {
     }
 
     pub fn add_sp_r8(&mut self, mmu: &Mmu) -> isize {
-        let offset = unsafe { mem::transmute::<u8, i8>(mmu.read_byte(self.register.pc)) };
+        let offset = mmu.read_byte(self.register.pc) as i8 as i16 as u16;
         self.register.pc += 1;
         let old_sp = self.register.sp;
-        let new_sp = (old_sp as i16).wrapping_add(offset as i16) as u16;
+        let new_sp = old_sp.wrapping_add(offset);
         self.register.sp = new_sp;
 
         // SET FLAGS
