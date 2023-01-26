@@ -268,7 +268,7 @@ impl Cpu {
             0xFE => self.cp_d8(mmu),
             0xFF => self.rst_38h(mmu),
 
-            _ => panic!("unsupported opcode: {}", op_code),
+            _ => panic!("unsupported opcode: {op_code}"),
         }
     }
 }
