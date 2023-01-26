@@ -222,7 +222,7 @@ impl Cpu {
             0xC8 => self.ret_z(mmu),
             0xC9 => self.ret(mmu),
             0xCA => self.jp_z_a16(mmu),
-            0xCB => todo!(),
+            0xCB => self.run_cb_instruction(mmu),
             0xCC => self.call_z_a16(mmu),
             0xCD => self.call_a16(mmu),
             0xCE => self.adc_a_d8(mmu),
