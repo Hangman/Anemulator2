@@ -58,7 +58,7 @@ impl Cpu {
             .set_flag(FlagId::Z, (value & (1 << index)) == 0);
         self.register.set_flag(FlagId::N, false);
         self.register.set_flag(FlagId::H, true);
-        8
+        16
     }
 
     pub fn bit_a(&mut self, index: u8) -> isize {
