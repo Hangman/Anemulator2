@@ -1,5 +1,6 @@
 mod add;
 mod and;
+mod bit;
 mod compare;
 mod dec;
 pub mod decode;
@@ -14,7 +15,7 @@ mod rlc;
 mod rrc;
 mod sla;
 mod sra;
-mod sub;
-mod xor;
-mod swap;
 mod srl;
+mod sub;
+mod swap;
+mod xor;
