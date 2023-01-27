@@ -16,3 +16,5 @@ mod sla;
 mod sra;
 mod sub;
 mod xor;
+mod swap;
+mod srl;
