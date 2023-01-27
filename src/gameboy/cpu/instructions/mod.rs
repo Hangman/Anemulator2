@@ -13,6 +13,7 @@ mod or;
 mod reset;
 mod rlc;
 mod rrc;
+mod set;
 mod sla;
 mod sra;
 mod srl;
