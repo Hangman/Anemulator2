@@ -1,3 +1,4 @@
 pub mod mbc;
-pub mod mbc1;
+mod mbc0;
+mod mbc1;
 pub mod rom_loader;

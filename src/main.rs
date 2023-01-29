@@ -1,7 +1,5 @@
 #![windows_subsystem = "windows"]
 
-extern crate core;
-
 use std::time::Instant;
 
 use pixels::{PixelsBuilder, SurfaceTexture};
@@ -14,6 +12,7 @@ mod gameboy;
 
 fn main() {
     println!("Starting Anemulator2");
+    println!("{}", std::env::current_dir().unwrap().display());
 
     let sdl = sdl2::init().expect("failed to initialize SDL");
     let audio_subsystem = sdl
@@ -52,7 +51,7 @@ fn main() {
 
     let mut event_pump = sdl.event_pump().expect("failed to get the event_pump");
 
-    let mut gameboy = Gameboy::new(String::from("test.rom"));
+    let mut gameboy = Gameboy::new(String::from("assets/Dr. Mario (World).gb"));
 
     'main: loop {
         let start = Instant::now();
@@ -93,14 +92,30 @@ fn main() {
             }
         }
 
+        // STEP EMULATION
         while !gameboy.step() {
             // do something
         }
 
+        // RENDER TO SCREEN
+        let screen = pixels.get_frame_mut();
+        let ppu_buffer = gameboy.mmu.ppu.front_buffer.as_ref();
+        screen[0] = ppu_buffer[0][0].r_as_u8();
+        let mut byte_index = 0;
+        for color in ppu_buffer.iter().flat_map(|r| r.iter()) {
+            screen[byte_index] = color.r_as_u8();
+            byte_index += 1;
+            screen[byte_index] = color.g_as_u8();
+            byte_index += 1;
+            screen[byte_index] = color.b_as_u8();
+            byte_index += 1;
+            screen[byte_index] = color.a_as_u8();
+            byte_index += 1;
+        }
         pixels.render().expect("failed to render framebuffer");
 
         // PRINT FRAME TIME
         let duration = start.elapsed();
-        println!("frame-time: {:?}", duration);
+        println!("frame-time: {duration:?}");
     }
 }

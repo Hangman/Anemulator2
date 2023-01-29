@@ -13,7 +13,7 @@ pub struct Mmu {
     timer: Timer,
     unit_lut: Vec<Box<dyn Memory>>,
     dma: u8,
-    ppu: Ppu,
+    pub ppu: Ppu,
     if_register: Rc<RefCell<u8>>,
 }
 
