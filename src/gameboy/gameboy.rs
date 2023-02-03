@@ -8,8 +8,7 @@ use crate::gameboy::memory::wram::Wram;
 
 pub struct Gameboy {
     cpu: Cpu,
-    // apu: Apu,
-    game_name: String,
+    pub game_name: String,
     pub mmu: Mmu,
     // joypad: Joypad,
 }
@@ -64,7 +63,7 @@ impl Gameboy {
 
     pub fn step(&mut self) -> bool {
         self.cpu.step(&mut self.mmu);
-        // this.apu.step();
+        // this.audio.step();
         self.mmu.step()
     }
 }

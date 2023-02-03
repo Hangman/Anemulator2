@@ -1,6 +1,6 @@
 #![windows_subsystem = "windows"]
 
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use pixels::{PixelsBuilder, SurfaceTexture};
 use sdl2::audio::{AudioQueue, AudioSpecDesired};
@@ -94,7 +94,12 @@ fn main() {
 
         // STEP EMULATION
         while !gameboy.step() {
-            // do something
+            if gameboy.mmu.apu.is_buffer_full() {
+                audio_queue.queue(&gameboy.mmu.apu.fetch_samples());
+                if audio_queue.size() > 1024 * 8 {
+                    std::thread::sleep(Duration::from_millis(1));
+                }
+            }
         }
 
         // RENDER TO SCREEN

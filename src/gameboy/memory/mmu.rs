@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
+use crate::gameboy::audio::apu::Apu;
 use crate::gameboy::mbc::mbc::Mbc;
 use crate::gameboy::memory::memory;
 use crate::gameboy::memory::memory::Memory;
@@ -14,6 +15,7 @@ pub struct Mmu {
     unit_lut: Vec<Box<dyn Memory>>,
     dma: u8,
     pub ppu: Ppu,
+    pub apu: Apu,
     if_register: Rc<RefCell<u8>>,
 }
 
@@ -26,6 +28,7 @@ impl Mmu {
             unit_lut: Vec::new(),
             dma: 0,
             ppu: Ppu::new(Rc::clone(&if_reg)),
+            apu: Apu::new(),
             if_register: if_reg,
         }
     }
@@ -48,7 +51,9 @@ impl Mmu {
 
     pub fn step(&mut self) -> bool {
         self.timer.step();
-        self.ppu.step()
+        let vsync = self.ppu.step();
+        self.apu.step();
+        vsync
     }
 
     fn dma_transfer(&mut self) {
@@ -80,9 +85,12 @@ impl Memory for Mmu {
         if self.timer.accepts_address(address) {
             return self.timer.read_byte(address);
         }
+        if self.apu.accepts_address(address) {
+            return self.apu.read_byte(address);
+        }
         let unit = self
             .get_unit(address)
-            .unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
+            .unwrap_or_else(|| panic!("missing memory unit for address: {address}"));
         unit.read_byte(address)
     }
 
@@ -108,9 +116,13 @@ impl Memory for Mmu {
             self.timer.write_byte(address, value);
             return;
         }
+        if self.apu.accepts_address(address) {
+            self.apu.write_byte(address, value);
+            return;
+        }
         let unit = self
             .get_mut_unit(address)
-            .unwrap_or_else(|| panic!("missing memory unit for address: {}", address));
+            .unwrap_or_else(|| panic!("missing memory unit for address: {address}"));
         unit.write_byte(address, value);
     }
 }

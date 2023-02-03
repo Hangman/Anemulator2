@@ -10,8 +10,8 @@ use crate::gameboy::util::color::Color;
 pub struct Ppu {
     vram: [u8; 0x4000],
     oam_ram: [u8; 0xA0],
-    pub front_buffer: Box<[[Color; 160]; 144]>,
-    back_buffer: Box<[[u16; 160]; 144]>,
+    pub front_buffer: Box<[[Color; 144]; 160]>,
+    back_buffer: Box<[[u16; 144]; 160]>,
     lcdc: u8,
     lcd_stat: u8,
     lcd_ly: u8,
@@ -67,8 +67,8 @@ impl Ppu {
         Self {
             vram: [0; 0x4000],
             oam_ram: [0; 0xA0],
-            front_buffer: Box::new([[TRANSPARENT; 160]; 144]),
-            back_buffer: Box::new([[0; 160]; 144]),
+            front_buffer: Box::new([[TRANSPARENT; 144]; 160]),
+            back_buffer: Box::new([[0; 144]; 160]),
             lcdc: 0,
             lcd_stat: 0,
             lcd_ly: 0,
