@@ -3,6 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::rc::Rc;
 
 use crate::gameboy::audio::apu::Apu;
+use crate::gameboy::joypad::Joypad;
 use crate::gameboy::mbc::mbc::Mbc;
 use crate::gameboy::memory::memory;
 use crate::gameboy::memory::memory::Memory;
@@ -16,6 +17,7 @@ pub struct Mmu {
     dma: u8,
     pub ppu: Ppu,
     pub apu: Apu,
+    pub joypad: Joypad,
     if_register: Rc<RefCell<u8>>,
 }
 
@@ -29,6 +31,7 @@ impl Mmu {
             dma: 0,
             ppu: Ppu::new(Rc::clone(&if_reg)),
             apu: Apu::new(),
+            joypad: Joypad::new(Rc::clone(&if_reg)),
             if_register: if_reg,
         }
     }
@@ -88,6 +91,9 @@ impl Memory for Mmu {
         if self.apu.accepts_address(address) {
             return self.apu.read_byte(address);
         }
+        if self.joypad.accepts_address(address) {
+            return self.joypad.read_byte(address);
+        }
         let unit = self
             .get_unit(address)
             .unwrap_or_else(|| panic!("missing memory unit for address: {address}"));
@@ -118,6 +124,10 @@ impl Memory for Mmu {
         }
         if self.apu.accepts_address(address) {
             self.apu.write_byte(address, value);
+            return;
+        }
+        if self.joypad.accepts_address(address) {
+            self.joypad.write_byte(address, value);
             return;
         }
         let unit = self

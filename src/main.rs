@@ -5,8 +5,10 @@ use std::time::{Duration, Instant};
 use pixels::{PixelsBuilder, SurfaceTexture};
 use sdl2::audio::{AudioQueue, AudioSpecDesired};
 use sdl2::event::{Event, WindowEvent};
+use sdl2::keyboard::Scancode;
 
 use crate::gameboy::gameboy::Gameboy;
+use crate::gameboy::util::joypad_key::JoypadKey;
 
 mod gameboy;
 
@@ -59,24 +61,24 @@ fn main() {
         // Handle window events if any
         for event in event_pump.poll_iter() {
             match event {
-                //     Event::KeyDown {
-                //         scancode: Some(code),
-                //         ..
-                //     } => {
-                //         if let Some(key) = map_scancode_key(code) {
-                //            // argentum.key_down(key);
-                //         }
-                //     }
-                //
-                //     Event::KeyUp {
-                //         scancode: Some(code),
-                //         ..
-                //     } => {
-                //         if let Some(key) = map_scancode_key(code) {
-                //          //   argentum.key_up(key);
-                //         }
-                //     }
-                //
+                Event::KeyDown {
+                    scancode: Some(code),
+                    ..
+                } => {
+                    if let Some(key) = map_scancode_key(code) {
+                        gameboy.mmu.joypad.on_joypad_state_change(key, true);
+                    }
+                }
+
+                Event::KeyUp {
+                    scancode: Some(code),
+                    ..
+                } => {
+                    if let Some(key) = map_scancode_key(code) {
+                        gameboy.mmu.joypad.on_joypad_state_change(key, false);
+                    }
+                }
+
                 Event::Quit { .. } => {
                     break 'main;
                 }
@@ -122,5 +124,19 @@ fn main() {
         // PRINT FRAME TIME
         let duration = start.elapsed();
         println!("frame-time: {duration:?}");
+    }
+}
+
+fn map_scancode_key(code: Scancode) -> Option<JoypadKey> {
+    match code {
+        Scancode::Up => Some(JoypadKey::Up),
+        Scancode::Left => Some(JoypadKey::Left),
+        Scancode::Down => Some(JoypadKey::Down),
+        Scancode::Right => Some(JoypadKey::Right),
+        Scancode::Return => Some(JoypadKey::Start),
+        Scancode::Space => Some(JoypadKey::Select),
+        Scancode::A => Some(JoypadKey::A),
+        Scancode::S => Some(JoypadKey::B),
+        _ => None,
     }
 }

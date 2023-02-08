@@ -10,7 +10,6 @@ pub struct Gameboy {
     cpu: Cpu,
     pub game_name: String,
     pub mmu: Mmu,
-    // joypad: Joypad,
 }
 
 impl Gameboy {
@@ -63,7 +62,6 @@ impl Gameboy {
 
     pub fn step(&mut self) -> bool {
         self.cpu.step(&mut self.mmu);
-        // this.audio.step();
         self.mmu.step()
     }
 }
